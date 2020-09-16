@@ -1,0 +1,21 @@
+{
+  "name": "mmdm/sim-fa-payment",
+  "description": "A simple yet nice iranian payment library",
+  "type": "library",
+  "license": "MIT",
+  "authors": [
+    {
+      "name": "MMDM",
+      "email": "mmdehghan95@gmail.com"
+    }
+  ],
+  "autoload": {
+    "psr-4": {
+      "Sim\\Payment\\": "src/"
+    }
+  },
+  "require": {
+    "php": ">=7.2",
+    "ext-soap": "*"
+  }
+}
