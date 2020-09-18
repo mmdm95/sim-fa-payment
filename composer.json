@@ -16,6 +16,8 @@
   },
   "require": {
     "php": ">=7.2",
-    "ext-soap": "*"
+    "ext-soap": "*",
+    "ext-curl": "*",
+    "ext-json": "*"
   }
 }
