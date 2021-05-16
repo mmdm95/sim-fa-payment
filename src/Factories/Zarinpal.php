@@ -2,19 +2,29 @@
 
 namespace Sim\Payment\Factories;
 
+use Sim\Event\Event;
+use Sim\Payment\Abstracts\AbstractParameterProvider;
 use Sim\Payment\Abstracts\AbstractPayment;
-use Sim\Payment\Exceptions\PaymentException;
-use Sim\Payment\Utils\Curl;
+use Sim\Payment\Abstracts\AbstractAdviceParameterProvider;
+use Sim\Payment\PaymentFactory;
+use Sim\Payment\Providers\Zarinpal\ZarinpalHandlerProvider;
+use Sim\Payment\Providers\Zarinpal\ZarinpalAdviceResultProvider;
+use Sim\Payment\Providers\Zarinpal\ZarinpalRequestResultProvider;
 use SoapClient as Soap;
 
 class Zarinpal extends AbstractPayment
 {
-    // operation constants
-    const OPERATION_REQUEST = 'request';
-    const OPERATION_VERIFY = 'verify';
+    // event constants
+    const DUPLICATE_SEND_ADVICE = 'send-advice:duplicate';
+    const FAILED_SEND_ADVICE = 'send-advice:failed';
 
     /**
-     * {@inheritdoc}
+     * @var string
+     */
+    protected $handlerMethod = PaymentFactory::METHOD_GET;
+
+    /**
+     * @var array
      */
     protected $code_message = [
         self::OPERATION_REQUEST => [
@@ -38,7 +48,7 @@ class Zarinpal extends AbstractPayment
     ];
 
     /**
-     * {@inheritdoc}
+     * @var array
      */
     protected $urls = [
         'service_url' => 'https://www.zarinpal.com/pg/services/WebGate/wsdl',
@@ -46,92 +56,122 @@ class Zarinpal extends AbstractPayment
     ];
 
     /**
-     * {@inheritdoc}
-     */
-    protected $gateway_variables_name = [
-        self::OPERATION_REQUEST => [
-            'Authority',
-            'Status',
-        ],
-    ];
-
-    /**
      * Zarinpal constructor.
-     * @param string|null $merchantID
+     * @param string $merchantId
      */
-    public function __construct(string $merchantID = null)
+    public function __construct(string $merchantId)
     {
+        parent::__construct();
+
+        // extra events
+        $this->event_provider->addEvent(new Event(self::DUPLICATE_SEND_ADVICE));
+        $this->event_provider->addEvent(new Event(self::FAILED_SEND_ADVICE));
+
         // URL also can be ir.zarinpal.com or de.zarinpal.com
         $this->client = new Soap($this->urls['service_url'], ['encoding' => 'UTF-8']);
 
-        if (!empty($merchantID)) {
-            $this->setParameter('MerchantID', $merchantID);
-        }
+        $this->parameters['MerchantID'] = $merchantId;
+    }
+
+    /**
+     * @param \Closure $closure
+     * @return static
+     */
+    public function duplicateSendAdviceClosure(\Closure $closure)
+    {
+        $this->emitter->addListener(self::DUPLICATE_SEND_ADVICE, $closure);
+        return $this;
+    }
+
+    /**
+     * @param \Closure $closure
+     * @return static
+     */
+    public function failedSendAdviceClosure(\Closure $closure)
+    {
+        $this->emitter->addListener(self::FAILED_SEND_ADVICE, $closure);
+        return $this;
     }
 
     /**
      * {@inheritdoc}
      */
-    public function handleRequest()
+    public function createRequest(AbstractParameterProvider $provider): void
     {
-        $result = [];
-        foreach ($this->gateway_variables_name[self::OPERATION_REQUEST] as $name) {
-            ${$name} = isset($_GET[$name]) ? Curl::escapeData($_GET[$name]) : null;
-            $result[$name] = ${$name};
-        }
+        $this->emitter->dispatch(self::BF_CREATE_REQUEST);
 
-        return $result;
+        $provider->setExtraParameter('MerchantID', $this->parameters['MerchantID']);
+        $result = $this->client->PaymentRequest($provider->getParameters());
+        $resProvider = new ZarinpalRequestResultProvider($result);
+
+        if ($resProvider->getStatus() == 100) {
+            $this->emitter->dispatch(self::OK_CREATE_REQUEST, [$resProvider]);
+        } else {
+            $this->emitter->dispatch(
+                self::NOT_OK_CREATE_REQUEST, [
+                    $resProvider->getStatus(),
+                    $this->getMessage($resProvider->getStatus(), self::OPERATION_REQUEST),
+                    $resProvider
+                ]
+            );
+        }
+        $this->emitter->dispatch(self::AF_CREATE_REQUEST, [$resProvider]);
     }
 
     /**
      * {@inheritdoc}
      */
-    public function createRequest()
+    public function sendAdvice(AbstractAdviceParameterProvider $provider): void
     {
-        return $this->client->PaymentRequest($this->getParameters());
+        $this->emitter->dispatch(self::BF_HANDLE_RESULT);
+
+        $resProvider = new ZarinpalHandlerProvider($this->handleRequest($this->gateway_variables_name[self::OPERATION_REQUEST]));
+
+        if (!empty($resProvider->getStatus()) || !empty($resProvider->getAuthority())) {
+            $this->emitter->dispatch(self::OK_HANDLE_RESULT, [$resProvider]);
+
+            $this->emitter->dispatch(self::BF_SEND_ADVICE);
+
+            if (empty($amount) || !is_numeric($amount)) {
+                $this->emitter->dispatch(self::NOT_OK_SEND_ADVICE, [-22, 'مبلغی برای احراز عملیات بانکی تعریف نشده است.']);
+            }
+            if (empty($authority)) {
+                $this->emitter->dispatch(self::NOT_OK_SEND_ADVICE, [-22, 'Authority برای احراز عملیات بانکی تعریف نشده است.']);
+            }
+
+            // add extra needed parameters to advice parameter provider
+            $provider->setExtraParameter('MerchantID', $this->parameters['MerchantID'])
+                ->setExtraParameter('Authority', $resProvider->getAuthority());
+
+            if ('OK' == $resProvider->getStatus()) {
+                $result = $this->client->PaymentVerification($provider->getParameters());
+
+                $adviceProvider = new ZarinpalAdviceResultProvider($result);
+                if ($adviceProvider->getStatus() == 100) {
+                    $this->emitter->dispatch(self::OK_SEND_ADVICE, [$adviceProvider]);
+                } else if ($adviceProvider->getStatus() == 101) {
+                    $this->emitter->dispatch(self::DUPLICATE_SEND_ADVICE, [101, $this->getMessage(101, self::OPERATION_REQUEST)]);
+                } else {
+                    $this->emitter->dispatch(self::FAILED_SEND_ADVICE, [-22, $this->getMessage(-22, self::OPERATION_REQUEST)]);
+                }
+            } else {
+                $this->emitter->dispatch(self::NOT_OK_SEND_ADVICE, [-22, 'تراکنش توسط کاربر لغو شد.']);
+            }
+
+            $this->emitter->dispatch(self::AF_SEND_ADVICE);
+        } else {
+            $this->emitter->dispatch(self::NOT_OK_HANDLE_RESULT);
+        }
+        $this->emitter->dispatch(self::AF_HANDLE_RESULT, [$resProvider]);
     }
 
     /**
-     * {@inheritdoc}
-     * @throws PaymentException
+     * @param array $data
+     * @param string $url
+     * @return mixed
      */
-    public function sendAdvice()
+    protected function request(array $data, string $url)
     {
-        $amount = $this->getParameter('Amount');
-        $authority = $this->getParameter('Authority');
-
-        if (empty($amount) || !is_numeric($amount)) {
-            throw new PaymentException('مبلغی برای احراز عملیات بانکی تعریف نشده است.');
-        }
-        if (empty($authority)) {
-            throw new PaymentException('Authority برای احراز عملیات بانکی تعریف نشده است.');
-        }
-
-        $result = new \stdClass();
-        $result->Message = 'تراکنش توسط کاربر لغو شد.';
-
-        if ('OK' == $this->getParameter('Status')) {
-            $result = $this->client->PaymentVerification([
-                'MerchantID' => $this->getParameter('MerchantID'),
-                'Authority' => $authority,
-                'Amount' => $amount,
-            ]);
-        }
-
-        return $result;
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function resetParameters()
-    {
-        // Get MerchantID
-        $merchantID = $this->getParameter('MerchantID');
-
-        // call parent reset
-        parent::resetParameters();
-
-        $this->setParameter('MerchantID', $merchantID);
+        return null;
     }
 }

@@ -2,21 +2,23 @@
 
 namespace Sim\Payment\Factories;
 
+use Sim\Payment\Abstracts\AbstractAdviceParameterProvider;
+use Sim\Payment\Abstracts\AbstractParameterProvider;
 use Sim\Payment\Abstracts\AbstractPayment;
 use Sim\Payment\PaymentFactory;
 use Sim\Payment\Providers\CurlProvider;
 use Sim\Payment\Providers\HeaderProvider;
-use Sim\Payment\Utils\Curl;
+use Sim\Payment\Providers\IDPay\IDPayAdviceResultProvider;
+use Sim\Payment\Providers\IDPay\IDPayRequestResultProvider;
+use Sim\Payment\Providers\IDPay\IDPayAdviceProvider;
+use Sim\Payment\Providers\IDPay\IDPayHandlerProvider;
+use Sim\Payment\Utils\PaymentCurlUtil;
 
 class IDPay extends AbstractPayment
 {
     // mode constants
     const MODE_DEVELOPMENT = 1;
     const MODE_PRODUCTION = 2;
-
-    // operation constants
-    const OPERATION_REQUEST = 'request';
-    const OPERATION_VERIFY = 'verify';
 
     /**
      * {@inheritdoc}
@@ -86,66 +88,69 @@ class IDPay extends AbstractPayment
     /**
      * IDPay constructor.
      * @param string|null $apiKey
+     * @param int $mode
      */
-    public function __construct(string $apiKey = null)
+    public function __construct(string $apiKey, int $mode = self::MODE_PRODUCTION)
     {
+        parent::__construct();
+
         // Set api key
-        if(!empty($apiKey)) {
-            $this->setParameter('APIKey', $apiKey);
-        }
-
+        $this->parameters['APIKey'] = $apiKey;
         // Set mode
-        $mode = self::MODE_PRODUCTION;
-        $this->setParameter('mode', $mode);
+        $this->parameters['mode'] = $mode;
     }
 
     /**
      * {@inheritdoc}
      */
-    public function handleRequest()
+    public function createRequest(AbstractParameterProvider $provider): void
     {
-        $result = [];
-        if ($_SERVER["REQUEST_METHOD"] == PaymentFactory::METHOD_POST) {
-            foreach ($this->gateway_variables_name[self::OPERATION_REQUEST] as $name) {
-                ${$name} = isset($_POST[$name]) ? Curl::escapeData($_POST[$name]) : null;
-                $result[$name] = ${$name};
-            }
+        $this->emitter->dispatch(self::BF_CREATE_REQUEST);
+        $result = $this->request($provider->getParameters(), $this->urls['payment']);
+        $resProvider = new IDPayRequestResultProvider($result['response']);
+
+        if (empty($resProvider->getErrorCode()) && !empty($resProvider->getId()) && !empty($resProvider->getLink())
+        ) {
+            $this->emitter->dispatch(self::OK_CREATE_REQUEST, [$resProvider]);
+        } else {
+            $this->emitter->dispatch(self::NOT_OK_CREATE_REQUEST, [$resProvider->getErrorCode(), $this->getMessage($resProvider->getErrorCode(), self::OPERATION_REQUEST)]);
         }
-
-        return $result;
+        $this->emitter->dispatch(self::AF_CREATE_REQUEST, [$resProvider]);
     }
 
     /**
+     * You DO NOT NEED to send provider to this method
+     *
      * {@inheritdoc}
      */
-    public function createRequest()
+    public function sendAdvice(AbstractAdviceParameterProvider $provider = null): void
     {
-        return $this->request($this->getParameters(), $this->urls['payment']);
-    }
+        $this->emitter->dispatch(self::BF_HANDLE_RESULT);
 
-    /**
-     * {@inheritdoc}
-     */
-    public function sendAdvice()
-    {
-        return $this->request($this->getParameters(), $this->urls['verify']);
-    }
+        $resProvider = new IDPayHandlerProvider($this->handleRequest($this->gateway_variables_name[self::OPERATION_REQUEST]));
 
-    /**
-     * {@inheritdoc}
-     */
-    public function resetParameters()
-    {
-        // Get api key
-        $apiKey = $this->getParameter('APIKey');
-        // Get mode
-        $mode = $this->getParameter('mode');
+        if (!empty($resProvider->getOrderId()) && !empty($resProvider->getStatus())) {
+            $this->emitter->dispatch(self::OK_HANDLE_RESULT, [$resProvider]);
 
-        // call parent reset
-        parent::resetParameters();
+            $this->emitter->dispatch(self::BF_SEND_ADVICE);
 
-        $this->setParameter('APIKey', $apiKey);
-        $this->setParameter('mode', $mode);
+            $provider = new IDPayAdviceProvider();
+            $provider->setExtraParameter('id', $resProvider->getId())
+                ->setExtraParameter('order_id', $resProvider->getOrderId());
+
+            $result = $this->request($provider->getParameters(), $this->urls['verify']);
+
+            $adviceProvider = new IDPayAdviceResultProvider($result['response']);
+            if (empty($adviceProvider->getErrorCode())) {
+                $this->emitter->dispatch(self::OK_SEND_ADVICE, [$adviceProvider]);
+            } else {
+                $this->emitter->dispatch(self::NOT_OK_SEND_ADVICE, [$adviceProvider->getErrorCode(), $this->getMessage($adviceProvider->getErrorCode(), self::OPERATION_VERIFY)]);
+            }
+            $this->emitter->dispatch(self::AF_SEND_ADVICE, [$adviceProvider]);
+        } else {
+            $this->emitter->dispatch(self::NOT_OK_HANDLE_RESULT);
+        }
+        $this->emitter->dispatch(self::AF_HANDLE_RESULT, [$resProvider]);
     }
 
     /**
@@ -168,10 +173,10 @@ class IDPay extends AbstractPayment
         //----- Add some header
         $headerProvider = new HeaderProvider();
         $headerProvider->contentType('application/json');
-        $headerProvider->addHeader('X-API-KEY', $this->getParameter('APIKey'));
+        $headerProvider->addHeader('X-API-KEY', $this->parameters['APIKey']);
 
-        if (!empty($this->getParameter('mode')) &&
-            $this->getParameter('mode') == self::MODE_DEVELOPMENT) {
+        if (!empty($this->parameters['mode']) &&
+            $this->parameters['mode'] == self::MODE_DEVELOPMENT) {
             $headerProvider->addHeader('X-SANDBOX', 1);
         }
         //-----
@@ -179,7 +184,7 @@ class IDPay extends AbstractPayment
         $curlProvider->setHeader($headerProvider);
 
         // Send request to gateway
-        $response = Curl::request($curlProvider);
+        $response = PaymentCurlUtil::request($curlProvider);
 
         // reset timezone to original
         date_default_timezone_set($prevTimezone);

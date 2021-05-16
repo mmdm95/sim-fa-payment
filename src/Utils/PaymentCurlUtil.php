@@ -2,10 +2,9 @@
 
 namespace Sim\Payment\Utils;
 
-use Sim\Payment\PaymentFactory;
 use Sim\Payment\Providers\CurlProvider;
 
-class Curl
+class PaymentCurlUtil
 {
     /**
      * @param CurlProvider $curl_provider
@@ -18,8 +17,6 @@ class Curl
      */
     public static function request(CurlProvider $curl_provider)
     {
-//        string $url, array $data, string $method = PaymentFactory::METHOD_POST, array $extra_options = []
-
         // open curl
         $curl_provider->init();
         // curl options
@@ -28,12 +25,10 @@ class Curl
         $curl_provider->execute();
 
         // decode executed curl to an object
-        $response = json_decode($curl_provider->getResponse());
-        // convert object to array
-        $response = self::objectToArray($response);
+        $response = json_decode($curl_provider->getResponse(), true);
 
-        if ($curl_provider->getErrorNO()) {
-            $response = null;
+        if ($curl_provider->getErrorNO() != 0) {
+            $response = [];
         }
 
         $error = $curl_provider->getErrorNO();
@@ -62,22 +57,5 @@ class Curl
         $data = htmlspecialchars($data);
 
         return $data;
-    }
-
-    /**
-     * @param $obj
-     * @return array
-     */
-    protected static function objectToArray($obj)
-    {
-        if (!is_array($obj) && !is_object($obj)) {
-            return $obj;
-        }
-
-        if (is_object($obj)) {
-            $obj = get_object_vars($obj);
-        }
-
-        return array_map('self::objectToArray', $obj);
     }
 }

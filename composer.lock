@@ -1,0 +1,66 @@
+{
+    "_readme": [
+        "This file locks the dependencies of your project to a known state",
+        "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
+        "This file is @generated automatically"
+    ],
+    "content-hash": "18dc5946d786a972cb12727613008dd4",
+    "packages": [
+        {
+            "name": "mmdm/sim-event-dispatcher",
+            "version": "v2.0.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/mmdm95/sim-event-dispatcher.git",
+                "reference": "858596c27576c03edc439f3775225c4bd5125a58"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/mmdm95/sim-event-dispatcher/zipball/858596c27576c03edc439f3775225c4bd5125a58",
+                "reference": "858596c27576c03edc439f3775225c4bd5125a58",
+                "shasum": ""
+            },
+            "require": {
+                "ext-json": "*",
+                "php": ">=7.2"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "Sim\\Event\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "MMDM",
+                    "email": "mmdehghan95@gmail.com"
+                }
+            ],
+            "description": "A simple yet nice event dispatcher",
+            "support": {
+                "issues": "https://github.com/mmdm95/sim-event-dispatcher/issues",
+                "source": "https://github.com/mmdm95/sim-event-dispatcher/tree/v2.0.0"
+            },
+            "time": "2021-04-02T19:11:34+00:00"
+        }
+    ],
+    "packages-dev": [],
+    "aliases": [],
+    "minimum-stability": "stable",
+    "stability-flags": [],
+    "prefer-stable": false,
+    "prefer-lowest": false,
+    "platform": {
+        "php": ">=7.2",
+        "ext-soap": "*",
+        "ext-curl": "*",
+        "ext-json": "*",
+        "ext-openssl": "*"
+    },
+    "platform-dev": [],
+    "plugin-api-version": "2.0.0"
+}

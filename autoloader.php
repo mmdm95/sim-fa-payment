@@ -11,6 +11,9 @@ spl_autoload_register(function ($class) {
         "{$namespace}\\" => [
             __DIR__ . '/src',
         ],
+        "Sim\\Event\\" => [
+            __DIR__ . '/vendor/mmdm/sim-event-dispatcher/src',
+        ],
     ];
 
     foreach ($prefixes as $prefix => $dirs) {

@@ -2,16 +2,22 @@
 
 namespace Sim\Payment\Factories;
 
+use Sim\Event\Event;
+use Sim\Payment\Abstracts\AbstractAdviceParameterProvider;
+use Sim\Payment\Abstracts\AbstractParameterProvider;
 use Sim\Payment\Abstracts\AbstractPayment;
 use Sim\Payment\PaymentFactory;
 use Sim\Payment\Providers\CurlProvider;
-use Sim\Payment\Utils\Curl;
+use Sim\Payment\Providers\Mabna\MabnaAdviceProvider;
+use Sim\Payment\Providers\Mabna\MabnaAdviceResultProvider;
+use Sim\Payment\Providers\Mabna\MabnaHandlerProvider;
+use Sim\Payment\Providers\Mabna\MabnaRequestResultProvider;
+use Sim\Payment\Utils\PaymentCurlUtil;
 
 class Mabna extends AbstractPayment
 {
-    // operation constants
-    const OPERATION_REQUEST = 'request';
-    const OPERATION_VERIFY = 'verify';
+    // event constants
+    const DUPLICATE_SEND_ADVICE = 'send-advice:duplicate';
 
     /**
      * {@inheritdoc}
@@ -80,50 +86,84 @@ class Mabna extends AbstractPayment
 
     /**
      * Mabna constructor.
+     * @param string $terminalId
      */
-    public function __construct()
+    public function __construct(string $terminalId)
     {
+        parent::__construct();
+
+        // extra events
+        $this->event_provider->addEvent(new Event(self::DUPLICATE_SEND_ADVICE));
+
+        // Set terminal id
+        $this->parameters['terminalID'] = $terminalId;
     }
 
     /**
      * {@inheritdoc}
      */
-    public function handleRequest()
+    public function createRequest(AbstractParameterProvider $provider): void
     {
-        $result = [];
-        if ($_SERVER["REQUEST_METHOD"] == PaymentFactory::METHOD_POST) {
-            foreach ($this->gateway_variables_name[self::OPERATION_REQUEST] as $name) {
-                ${$name} = isset($_POST[$name]) ? Curl::escapeData($_POST[$name]) : null;
-                $result[$name] = ${$name};
-            }
+        $this->emitter->dispatch(self::BF_CREATE_REQUEST);
+        $provider->setExtraParameter('terminalID', $this->parameters['terminalID']);
+        $result = $this->request($provider->getParameters(), $this->urls['get_token']);
+        $resProvider = new MabnaRequestResultProvider(array_merge($result['response'], ['Url' => $this->urls['payment']]));
+
+        if (!empty($resProvider->getStatus()) && !empty($resProvider->getAccessToken()) && $resProvider->getStatus() == 0) {
+            $this->emitter->dispatch(self::OK_CREATE_REQUEST, [$resProvider]);
+        } else {
+            $this->emitter->dispatch(self::NOT_OK_CREATE_REQUEST, [$resProvider->getStatus(), $this->getMessage($resProvider->getStatus(), self::OPERATION_VERIFY)]);
         }
 
-        return $result;
+        $this->emitter->dispatch(self::AF_CREATE_REQUEST, [$resProvider]);
     }
 
     /**
+     * You DO NOT NEED to send provider to this method
+     *
      * {@inheritdoc}
      */
-    public function createRequest()
+    public function sendAdvice(AbstractAdviceParameterProvider $provider = null): void
     {
-        return $this->request($this->getParameters(), $this->urls['payment']);
-    }
+        $this->emitter->dispatch(self::BF_HANDLE_RESULT);
 
-    /**
-     * @return array|mixed
-     */
-    public function getToken()
-    {
-        return $this->request($this->getParameters(), $this->urls['get_token']);
-    }
+        $resProvider = new MabnaHandlerProvider($this->handleRequest($this->gateway_variables_name[self::OPERATION_REQUEST]));
 
-    /**
-     * {@inheritdoc}
-     */
-    public function sendAdvice()
-    {
-        $sendData = array_intersect_key($this->getParameters(), array_flip($this->gateway_variables_name[self::OPERATION_VERIFY]));
-        return $this->request($sendData, $this->urls['verify']);
+        if (
+            !empty($resProvider->getRespCode()) && !empty($resProvider->getRespMsg()) && !empty($resProvider->getAmount()) &&
+            !empty($resProvider->getPayload()) && !empty($resProvider->getTerminalId()) && !empty($resProvider->getTraceNumber()) &&
+            !empty($resProvider->getRRN()) && !empty($resProvider->getDatePaid()) && !empty($resProvider->getDigitalReceipt()) &&
+            !empty($resProvider->getIssuerBank()) && !empty($resProvider->getPayId()) &&
+            !empty($resProvider->getCardNumber()) && !empty($resProvider->getInvoiceId()) &&
+            $resProvider->getRespCode() == 0 && $resProvider->getTerminalId() == $this->parameters['terminalID']
+        ) {
+            $this->emitter->dispatch(self::OK_HANDLE_RESULT, [$resProvider]);
+
+            $this->emitter->dispatch(self::BF_SEND_ADVICE);
+
+            $provider = new MabnaAdviceProvider();
+            $provider->setExtraParameter('Tid', $this->parameters['terminalID'])
+                ->setExtraParameter('digitalreceipt', $resProvider->getDigitalReceipt());
+
+            $result = $this->request($provider->getParameters(), $this->urls['verify']);
+
+            $adviceProvider = new MabnaAdviceResultProvider($result['response']);
+            if (!empty($adviceProvider->getStatus()) &&
+                ($adviceProvider->getStatus() == 'OK' || $adviceProvider->getStatus() == 'Duplicate')
+            ) {
+                if ($adviceProvider->getStatus() == 'OK') {
+                    $this->emitter->dispatch(self::OK_SEND_ADVICE, [$adviceProvider]);
+                } else {
+                    $this->emitter->dispatch(self::DUPLICATE_SEND_ADVICE, [$adviceProvider]);
+                }
+            } else {
+                $this->emitter->dispatch(self::NOT_OK_SEND_ADVICE, [$adviceProvider->getReturnId(), $this->getMessage($adviceProvider->getReturnId(), self::OPERATION_VERIFY)]);
+            }
+            $this->emitter->dispatch(self::AF_SEND_ADVICE, [$adviceProvider]);
+        } else {
+            $this->emitter->dispatch(self::NOT_OK_HANDLE_RESULT);
+        }
+        $this->emitter->dispatch(self::AF_HANDLE_RESULT, [$resProvider]);
     }
 
     /**
@@ -144,7 +184,7 @@ class Mabna extends AbstractPayment
         $curlProvider->setSSLVerifyHost(false);
 
         // Send request to gateway
-        $response = Curl::request($curlProvider);
+        $response = PaymentCurlUtil::request($curlProvider);
 
         // reset timezone to original
         date_default_timezone_set($prevTimezone);

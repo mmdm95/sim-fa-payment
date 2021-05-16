@@ -18,6 +18,8 @@
     "php": ">=7.2",
     "ext-soap": "*",
     "ext-curl": "*",
-    "ext-json": "*"
+    "ext-json": "*",
+    "ext-openssl": "*",
+    "mmdm/sim-event-dispatcher": "^2.0"
   }
 }

@@ -3,14 +3,25 @@
 namespace Sim\Payment\Abstracts;
 
 use Sim\Payment\Interfaces\IPayment;
+use Sim\Payment\PaymentFactory;
+use Sim\Payment\Utils\PaymentCurlUtil;
 
-abstract class AbstractPayment implements IPayment
+abstract class AbstractPayment extends AbstractPaymentEvent implements IPayment
 {
+    // operation constants
+    const OPERATION_REQUEST = 'request';
+    const OPERATION_VERIFY = 'verify';
+
     /**
      * For those gateways that need to connect with Soap
      * @var \SoapClient|null $client
      */
     protected $client = null;
+
+    /**
+     * @var string
+     */
+    protected $handlerMethod = PaymentFactory::METHOD_POST;
 
     /**
      * @var array $parameters
@@ -41,74 +52,15 @@ abstract class AbstractPayment implements IPayment
      *
      * @var array $gateway_variables_name
      */
-    protected $gateway_variables_name = [];
+    protected $gateway_variables_name = [
+        self::OPERATION_REQUEST => [],
+        self::OPERATION_VERIFY => [],
+    ];
 
     /**
      * @var string $unknown_message
      */
     protected $unknown_message = 'پیام نامشخص';
-
-    /**
-     * @param $name
-     * @param $value
-     */
-    public function __set($name, $value)
-    {
-        $this->setParameter($name, $value);
-    }
-
-    /**
-     * @param $name
-     * @return mixed|null
-     */
-    public function __get($name)
-    {
-        if (array_key_exists($name, $this->parameters)) {
-            return $this->getParameter($name);
-        }
-
-        $trace = debug_backtrace();
-        trigger_error(
-            'Undefined property via __get(): ' . $name .
-            ' in ' . $trace[0]['file'] .
-            ' on line ' . $trace[0]['line'],
-            E_USER_NOTICE);
-        return null;
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function setParameter(string $parameter_name, $parameter_value)
-    {
-        $this->parameters[$parameter_name] = $parameter_value;
-        return $this;
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function getParameter(string $parameter_name, $prefer = null)
-    {
-        return $this->parameters[$parameter_name] ?? $prefer;
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function getParameters(): array
-    {
-        return $this->parameters;
-    }
-
-    /**
-     * @return static
-     */
-    public function resetParameters()
-    {
-        $this->parameters = [];
-        return $this;
-    }
 
     /**
      * @param int $code
@@ -125,9 +77,22 @@ abstract class AbstractPayment implements IPayment
      * @param string $url
      * @return mixed
      */
-    protected function request(array $data, string $url)
+    abstract protected function request(array $data, string $url);
+
+    /**
+     * @param array $data
+     * @return array
+     */
+    protected function handleRequest(array $data): array
     {
-        // Do whatever needed for gateway or do nothing
-        return null;
+        $result = [];
+        if (strtoupper($_SERVER["REQUEST_METHOD"]) == $this->handlerMethod) {
+            foreach ($data as $name) {
+                $result[$name] = isset(${'_' . $this->handlerMethod}[$name])
+                    ? PaymentCurlUtil::escapeData(${'_' . $this->handlerMethod}[$name])
+                    : null;
+            }
+        }
+        return $result;
     }
 }

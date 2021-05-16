@@ -2,16 +2,26 @@
 
 namespace Sim\Payment\Factories;
 
+use Sim\Event\Event;
+use Sim\Payment\Abstracts\AbstractAdviceParameterProvider;
+use Sim\Payment\Abstracts\AbstractParameterProvider;
 use Sim\Payment\Abstracts\AbstractPayment;
-use Sim\Payment\PaymentFactory;
-use Sim\Payment\Utils\Curl;
+use Sim\Payment\Providers\BehPardakht\BehPardakhtAdviceProvider;
+use Sim\Payment\Providers\BehPardakht\BehPardakhtAdviceResultProvider;
+use Sim\Payment\Providers\BehPardakht\BehPardakhtHandlerProvider;
+use Sim\Payment\Providers\BehPardakht\BehPardakhtRequestResultProvider;
+use Sim\Payment\Providers\BehPardakht\BehPardakhtSettleProvider;
+use Sim\Payment\Providers\BehPardakht\BehPardakhtSettleResultProvider;
 use SoapClient as Soap;
 
 class BehPardakht extends AbstractPayment
 {
-    // operation constants
-    const OPERATION_REQUEST = 'request';
-    const OPERATION_VERIFY = 'verify';
+    // event constants
+    const DUPLICATE_SEND_ADVICE = 'send-advice:duplicate';
+    const BF_SEND_SETTLE = 'send-settle:bf';
+    const AF_SEND_SETTLE = 'send-settle:af';
+    const OK_SEND_SETTLE = 'send-settle:ok';
+    const NOT_OK_SEND_SETTLE = 'send-settle:not-ok';
 
     /**
      * {@inheritdoc}
@@ -98,112 +108,186 @@ class BehPardakht extends AbstractPayment
 
     /**
      * BehPardakht constructor.
-     * @param string|null $terminal_id
-     * @param string|null $username
-     * @param string|null $password
+     * @param string $terminalId - Usually numeric value
+     * @param string $username
+     * @param string $password
      */
-    public function __construct(string $terminal_id = null, string $username = null, string $password = null)
+    public function __construct(string $terminalId, string $username, string $password)
     {
+        parent::__construct();
+
+        // extra events
+        $this->event_provider->addEvent(new Event(self::DUPLICATE_SEND_ADVICE));
+        $this->event_provider->addEvent(new Event(self::BF_SEND_SETTLE));
+        $this->event_provider->addEvent(new Event(self::AF_SEND_SETTLE));
+        $this->event_provider->addEvent(new Event(self::OK_SEND_SETTLE));
+        $this->event_provider->addEvent(new Event(self::NOT_OK_SEND_SETTLE));
+
         // connect to service
         $this->client = new Soap($this->urls['service_url'], ['encoding' => 'UTF-8']);
 
         //----- Set credential info
-        if (is_numeric($terminal_id)) {
-            $this->setParameter('terminalId', $terminal_id);
-        }
-        if (!empty($username)) {
-            $this->setParameter('userName', $username);
-        }
-        if (!empty($password)) {
-            $this->setParameter('userPassword', $password);
-        }
+        $this->parameters['terminalId'] = $terminalId;
+        $this->parameters['userName'] = $username;
+        $this->parameters['userPassword'] = $password;
         //-----
     }
 
     /**
-     * {@inheritdoc}
+     * @param \Closure $closure
+     * @return static
      */
-    public function handleRequest()
+    public function duplicateSendAdviceClosure(\Closure $closure)
     {
-        $result = [];
-        if ($_SERVER["REQUEST_METHOD"] == PaymentFactory::METHOD_POST) {
-            foreach ($this->gateway_variables_name[self::OPERATION_REQUEST] as $name) {
-                ${$name} = isset($_POST[$name]) ? Curl::escapeData($_POST[$name]) : null;
-                $result[$name] = ${$name};
-            }
-        }
+        $this->emitter->addListener(self::DUPLICATE_SEND_ADVICE, $closure);
+        return $this;
+    }
 
-        return $result;
+    /**
+     * @param \Closure $closure
+     * @return static
+     */
+    public function beforeSendSettleClosure(\Closure $closure)
+    {
+        $this->emitter->addListener(self::BF_SEND_SETTLE, $closure);
+        return $this;
+    }
+
+    /**
+     * @param \Closure $closure
+     * @return static
+     */
+    public function afterSendSettleClosure(\Closure $closure)
+    {
+        $this->emitter->addListener(self::AF_SEND_SETTLE, $closure);
+        return $this;
+    }
+
+    /**
+     * @param \Closure $closure
+     * @return static
+     */
+    public function sendSettleOKClosure(\Closure $closure)
+    {
+        $this->emitter->addListener(self::OK_SEND_SETTLE, $closure);
+        return $this;
+    }
+
+    /**
+     * @param \Closure $closure
+     * @return static
+     */
+    public function sendSettleNotOkClosure(\Closure $closure)
+    {
+        $this->emitter->addListener(self::NOT_OK_SEND_SETTLE, $closure);
+        return $this;
     }
 
     /**
      * {@inheritdoc}
      */
-    public function createRequest()
+    public function createRequest(AbstractParameterProvider $provider): void
     {
-        $data = $this->getParameters();
+        $this->emitter->dispatch(self::BF_CREATE_REQUEST);
 
         $result = $this->client->__soapCall('bpPayRequest', [
-            'parameters' => $data,
+            'parameters' => $provider->getParameters(),
             'namespace' => $this->namespace,
         ]);
-
-        $res = new \stdClass();
-        $res->ResCode = null;
-        $res->RefId = null;
-        $res->Result = $result;
-
+        //-----
+        $refId = null;
+        $resCode = null;
         if (!is_soap_fault($result)) {
             $result = explode(',', $result);
             if (2 == count($result)) {
-                $res->ResCode = $result[0];
-                $res->RefId = $result[1] ?? '';
+                $resCode = $result[0];
+                $refId = $result[1] ?? '';
             }
         }
+        //-----
+        $resProvider = new BehPardakhtRequestResultProvider([
+            'RefId' => $refId,
+            'ResCode' => $resCode,
+        ]);
 
-        return $res;
+        if (!empty($resProvider->getResCode()) && $resProvider->getResCode() == 0) {
+            $this->emitter->dispatch(self::OK_CREATE_REQUEST, [$resProvider]);
+        } else {
+            $this->emitter->dispatch(self::NOT_OK_CREATE_REQUEST, [$resProvider->getResCode(), $this->getMessage($resProvider->getResCode(), self::OPERATION_REQUEST)]);
+        }
+        $this->emitter->dispatch(self::AF_CREATE_REQUEST, [$resProvider]);
     }
 
     /**
      * {@inheritdoc}
      */
-    public function sendAdvice()
+    public function sendAdvice(AbstractAdviceParameterProvider $provider = null): void
     {
-        $data = $this->getParameters();
-        // Check request
-        return $this->client->__soapCall('bpVerifyRequest', [
-            'parameters' => $data,
-            'namespace' => $this->namespace,
-        ]);
+        $this->emitter->dispatch(self::BF_HANDLE_RESULT);
+
+        $resProvider = new BehPardakhtHandlerProvider($this->handleRequest($this->gateway_variables_name[self::OPERATION_REQUEST]));
+
+        if (!empty($resProvider->getRefId()) && !empty($resProvider->getResCode()) && !empty($resProvider->getSaleOrderId())) {
+            $this->emitter->dispatch(self::OK_HANDLE_RESULT, [$resProvider]);
+
+            $this->emitter->dispatch(self::BF_SEND_ADVICE);
+
+            $provider = new BehPardakhtAdviceProvider();
+            $provider->setExtraParameter('orderId', $resProvider->getSaleOrderId())
+                ->setExtraParameter('saleOrderId', $resProvider->getSaleOrderId())
+                ->setExtraParameter('saleReferenceId', $resProvider->getSaleReferenceId());
+
+            $result = $this->client->__soapCall('bpVerifyRequest', [
+                'parameters' => $provider->getParameters(),
+                'namespace' => $this->namespace,
+            ]);
+
+            $adviceResProvider = new BehPardakhtAdviceResultProvider($result);
+            if ($adviceResProvider->getReturn() == 0 || $adviceResProvider->getReturn() == 51) {
+                if ($adviceResProvider->getReturn() == 0) {
+                    $this->emitter->dispatch(self::OK_SEND_ADVICE, [$adviceResProvider]);
+
+                    $this->emitter->dispatch(self::BF_SEND_SETTLE);
+
+                    $settleProvider = new BehPardakhtSettleProvider();
+                    $settleProvider->setExtraParameter('orderId', $resProvider->getSaleOrderId())
+                        ->setExtraParameter('saleOrderId', $resProvider->getSaleOrderId())
+                        ->setExtraParameter('saleReferenceId', $resProvider->getSaleReferenceId());
+
+                    // Settle request
+                    $result = $this->client->__soapCall('bpSettleRequest', [
+                        'parameters' => $settleProvider->getParameters(),
+                        'namespace' => $this->namespace,
+                    ]);
+
+                    $settleResProvider = new BehPardakhtSettleResultProvider($result);
+
+                    if (!empty($settleResProvider->getReturn()) && $settleResProvider->getReturn() == 0) {
+                        $this->emitter->dispatch(self::OK_SEND_SETTLE, [$settleResProvider]);
+                    } else {
+                        $this->emitter->dispatch(self::NOT_OK_SEND_SETTLE, [$settleResProvider->getReturn(), $this->getMessage($settleResProvider->getReturn(), self::OPERATION_REQUEST)]);
+                    }
+                    $this->emitter->dispatch(self::AF_SEND_SETTLE, [$settleResProvider]);
+                } else {
+                    $this->emitter->dispatch(self::DUPLICATE_SEND_ADVICE, [$adviceResProvider]);
+                }
+            } else {
+                $this->emitter->dispatch(self::NOT_OK_SEND_ADVICE, [$result['return'], $this->getMessage($result['return'], self::OPERATION_REQUEST)]);
+            }
+            $this->emitter->dispatch(self::AF_SEND_ADVICE, [$result]);
+        } else {
+            $this->emitter->dispatch(self::NOT_OK_HANDLE_RESULT);
+        }
+        $this->emitter->dispatch(self::AF_HANDLE_RESULT, [$resProvider]);
     }
 
     /**
+     * @param array $data
+     * @param string $url
      * @return mixed
      */
-    public function settleRequest()
+    protected function request(array $data, string $url)
     {
-        $data = $this->getParameters();
-        // Settle request
-        return $this->client->__soapCall('bpSettleRequest', [
-            'parameters' => $data,
-            'namespace' => $this->namespace,
-        ]);
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function resetParameters()
-    {
-        $terminal_id = $this->getParameter('terminalId');
-        $username = $this->getParameter('userName');
-        $password = $this->getParameter('userPassword');
-
-        // call parent reset
-        parent::resetParameters();
-
-        $this->setParameter('terminalId', $terminal_id);
-        $this->setParameter('userName', $username);
-        $this->setParameter('userPassword', $password);
+        return null;
     }
 }

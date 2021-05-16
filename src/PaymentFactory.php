@@ -5,6 +5,7 @@ namespace Sim\Payment;
 use Sim\Payment\Factories\BehPardakht;
 use Sim\Payment\Factories\IDPay;
 use Sim\Payment\Factories\Mabna;
+use Sim\Payment\Factories\Sadad;
 use Sim\Payment\Factories\Zarinpal;
 
 class PaymentFactory
@@ -19,23 +20,26 @@ class PaymentFactory
     const GATEWAY_MABNA = 2;
     const GATEWAY_BEH_PARDAKHT = 3;
     const GATEWAY_ZARINPAL = 4;
+    const GATEWAY_SADAD = 5;
 
     /**
      * @param int $type
      * @param mixed ...$data
-     * @return BehPardakht|IDPay|Mabna|Zarinpal|null
+     * @return BehPardakht|IDPay|Mabna|Zarinpal|Sadad|null
      */
-    public static function instance(int $type,  ...$data)
+    public static function instance(int $type, ...$data)
     {
         switch ($type) {
             case self::GATEWAY_ID_PAY:
                 return new IDPay(...$data);
             case self::GATEWAY_MABNA:
-                return new Mabna();
+                return new Mabna(...$data);
             case self::GATEWAY_BEH_PARDAKHT:
                 return new BehPardakht(...$data);
             case self::GATEWAY_ZARINPAL:
                 return new Zarinpal(...$data);
+            case self::GATEWAY_SADAD:
+                return new Sadad(...$data);
             default:
                 return null;
         }

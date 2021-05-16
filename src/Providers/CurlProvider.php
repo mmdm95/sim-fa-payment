@@ -113,19 +113,19 @@ class CurlProvider
     }
 
     /**
-     * @param array $data
+     * @param string|array $data
      * @return static
      */
-    public function setFields(array $data)
+    public function setFields($data)
     {
         $this->options[CURLOPT_POSTFIELDS] = $data;
         return $this;
     }
 
     /**
-     * @return array
+     * @return mixed|array
      */
-    public function getFields(): array
+    public function getFields()
     {
         return $this->options[CURLOPT_POSTFIELDS] ?? [];
     }
@@ -216,14 +216,14 @@ class CurlProvider
     }
 
     /**
-     * @return int
+     * @return string|null
      */
-    public function getError(): int
+    public function getError(): ?string
     {
         if (false !== $this->curl_handler) {
             return curl_error($this->curl_handler);
         }
-        return 0;
+        return null;
     }
 
     /**
