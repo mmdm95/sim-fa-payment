@@ -24,7 +24,7 @@ class PaymentCurlUtil
         // execute curl
         $curl_provider->execute();
 
-        // decode executed curl to an object
+        // decode executed curl to an array
         $response = json_decode($curl_provider->getResponse(), true);
 
         if ($curl_provider->getErrorNO() != 0) {
