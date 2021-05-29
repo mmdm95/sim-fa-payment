@@ -45,4 +45,28 @@ class SadadRequestProvider extends AbstractParameterProvider
     {
         $this->parameters['OrderId'] = $orderId;
     }
+
+    /**
+     * @param string $additionalData
+     */
+    public function setAdditionalData(string $additionalData)
+    {
+        $this->parameters['AdditionalData'] = $additionalData;
+    }
+
+    /**
+     * @param $userId
+     */
+    public function setUserId($userId)
+    {
+        $this->parameters['UserId'] = $userId;
+    }
+
+    /**
+     * @param string $applicationName
+     */
+    public function setApplicationName(string $applicationName)
+    {
+        $this->parameters['ApplicationName'] = $applicationName;
+    }
 }
