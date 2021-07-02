@@ -139,7 +139,7 @@ class Mabna extends AbstractPayment
         ) {
             $this->emitter->dispatch(self::OK_HANDLE_RESULT, [$resProvider]);
 
-            $this->emitter->dispatch(self::BF_SEND_ADVICE);
+            $this->emitter->dispatch(self::BF_SEND_ADVICE, [$resProvider]);
 
             $provider = new MabnaAdviceProvider();
             $provider->setExtraParameter('Tid', $this->parameters['terminalID'])
@@ -160,12 +160,13 @@ class Mabna extends AbstractPayment
                 $this->emitter->dispatch(self::NOT_OK_SEND_ADVICE, [
                     $adviceProvider->getReturnId(),
                     $this->getMessage($adviceProvider->getReturnId(), self::OPERATION_VERIFY),
+                    $adviceProvider,
                     $resProvider
                 ]);
             }
-            $this->emitter->dispatch(self::AF_SEND_ADVICE, [$adviceProvider]);
+            $this->emitter->dispatch(self::AF_SEND_ADVICE, [$adviceProvider, $resProvider]);
         } else {
-            $this->emitter->dispatch(self::NOT_OK_HANDLE_RESULT);
+            $this->emitter->dispatch(self::NOT_OK_HANDLE_RESULT, [$resProvider]);
         }
         $this->emitter->dispatch(self::AF_HANDLE_RESULT, [$resProvider]);
     }

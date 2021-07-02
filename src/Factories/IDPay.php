@@ -132,7 +132,7 @@ class IDPay extends AbstractPayment
         if (!empty($resProvider->getOrderId()) && !empty($resProvider->getStatus())) {
             $this->emitter->dispatch(self::OK_HANDLE_RESULT, [$resProvider]);
 
-            $this->emitter->dispatch(self::BF_SEND_ADVICE);
+            $this->emitter->dispatch(self::BF_SEND_ADVICE, [$resProvider]);
 
             $provider = new IDPayAdviceProvider();
             $provider->setExtraParameter('id', $resProvider->getId())
@@ -147,12 +147,13 @@ class IDPay extends AbstractPayment
                 $this->emitter->dispatch(self::NOT_OK_SEND_ADVICE, [
                     $adviceProvider->getErrorCode(),
                     $this->getMessage($adviceProvider->getErrorCode(), self::OPERATION_VERIFY),
+                    $adviceProvider,
                     $resProvider
                 ]);
             }
-            $this->emitter->dispatch(self::AF_SEND_ADVICE, [$adviceProvider]);
+            $this->emitter->dispatch(self::AF_SEND_ADVICE, [$adviceProvider, $resProvider]);
         } else {
-            $this->emitter->dispatch(self::NOT_OK_HANDLE_RESULT);
+            $this->emitter->dispatch(self::NOT_OK_HANDLE_RESULT, [$resProvider]);
         }
         $this->emitter->dispatch(self::AF_HANDLE_RESULT, [$resProvider]);
     }

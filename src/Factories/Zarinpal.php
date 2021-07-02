@@ -130,17 +130,16 @@ class Zarinpal extends AbstractPayment
         if (!empty($resProvider->getStatus()) || !empty($resProvider->getAuthority())) {
             $this->emitter->dispatch(self::OK_HANDLE_RESULT, [$resProvider]);
 
-            $this->emitter->dispatch(self::BF_SEND_ADVICE);
-
+            $amount = $provider->getParameter('Amount');
             if (empty($amount) || !is_numeric($amount)) {
-                $this->emitter->dispatch(self::NOT_OK_SEND_ADVICE, [
+                $this->emitter->dispatch(self::FAILED_SEND_ADVICE, [
                     -22,
                     'مبلغی برای احراز عملیات بانکی تعریف نشده است.',
                     $resProvider
                 ]);
             }
-            if (empty($authority)) {
-                $this->emitter->dispatch(self::NOT_OK_SEND_ADVICE, [
+            if (empty($resProvider->getAuthority())) {
+                $this->emitter->dispatch(self::FAILED_SEND_ADVICE, [
                     -22,
                     'Authority برای احراز عملیات بانکی تعریف نشده است.',
                     $resProvider
@@ -152,27 +151,38 @@ class Zarinpal extends AbstractPayment
                 ->setExtraParameter('Authority', $resProvider->getAuthority());
 
             if ('OK' == $resProvider->getStatus()) {
+                $this->emitter->dispatch(self::BF_SEND_ADVICE, [$resProvider]);
+
                 $result = $this->client->PaymentVerification($provider->getParameters());
 
                 $adviceProvider = new ZarinpalAdviceResultProvider($result);
                 if ($adviceProvider->getStatus() == 100) {
                     $this->emitter->dispatch(self::OK_SEND_ADVICE, [$adviceProvider]);
                 } else if ($adviceProvider->getStatus() == 101) {
-                    $this->emitter->dispatch(self::DUPLICATE_SEND_ADVICE, [101, $this->getMessage(101, self::OPERATION_REQUEST)]);
+                    $this->emitter->dispatch(self::DUPLICATE_SEND_ADVICE, [
+                        101,
+                        $this->getMessage(101, self::OPERATION_REQUEST),
+                        $adviceProvider
+                    ]);
                 } else {
-                    $this->emitter->dispatch(self::FAILED_SEND_ADVICE, [-22, $this->getMessage(-22, self::OPERATION_REQUEST)]);
+                    $this->emitter->dispatch(self::NOT_OK_SEND_ADVICE, [
+                        -22,
+                        $this->getMessage(-22, self::OPERATION_REQUEST),
+                        $adviceProvider,
+                        $resProvider
+                    ]);
                 }
+
+                $this->emitter->dispatch(self::AF_SEND_ADVICE, [$adviceProvider, $resProvider]);
             } else {
-                $this->emitter->dispatch(self::NOT_OK_SEND_ADVICE, [
+                $this->emitter->dispatch(self::FAILED_SEND_ADVICE, [
                     -22,
                     'تراکنش توسط کاربر لغو شد.',
                     $resProvider
                 ]);
             }
-
-            $this->emitter->dispatch(self::AF_SEND_ADVICE);
         } else {
-            $this->emitter->dispatch(self::NOT_OK_HANDLE_RESULT);
+            $this->emitter->dispatch(self::NOT_OK_HANDLE_RESULT, [$resProvider]);
         }
         $this->emitter->dispatch(self::AF_HANDLE_RESULT, [$resProvider]);
     }

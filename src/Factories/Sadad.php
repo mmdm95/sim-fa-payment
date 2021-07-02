@@ -165,7 +165,7 @@ class Sadad extends AbstractPayment
             !empty($resProvider->getResCode()) && $resProvider->getResCode(-1) == 0) {
             $this->emitter->dispatch(self::OK_HANDLE_RESULT, [$resProvider]);
 
-            $this->emitter->dispatch(self::BF_SEND_ADVICE);
+            $this->emitter->dispatch(self::BF_SEND_ADVICE, [$resProvider]);
 
             $provider = new SadadAdviceProvider();
             $provider->setExtraParameter('Token', $resProvider->getToken())
@@ -180,12 +180,13 @@ class Sadad extends AbstractPayment
                 $this->emitter->dispatch(self::NOT_OK_SEND_ADVICE, [
                     $adviceProvider->getResCode(),
                     'تراکنش نا موفق بود در صورت کسر مبلغ از حساب شما حداکثر پس از 72 ساعت مبلغ به حسابتان برمی گردد.',
+                    $adviceProvider,
                     $resProvider
                 ]);
             }
-            $this->emitter->dispatch(self::AF_SEND_ADVICE, [$adviceProvider]);
+            $this->emitter->dispatch(self::AF_SEND_ADVICE, [$adviceProvider, $resProvider]);
         } else {
-            $this->emitter->dispatch(self::NOT_OK_HANDLE_RESULT);
+            $this->emitter->dispatch(self::NOT_OK_HANDLE_RESULT, [$resProvider]);
         }
         $this->emitter->dispatch(self::AF_HANDLE_RESULT, [$resProvider]);
     }
