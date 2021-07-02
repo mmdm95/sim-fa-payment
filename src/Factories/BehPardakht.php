@@ -265,14 +265,22 @@ class BehPardakht extends AbstractPayment
                     if (!empty($settleResProvider->getReturn()) && $settleResProvider->getReturn() == 0) {
                         $this->emitter->dispatch(self::OK_SEND_SETTLE, [$settleResProvider]);
                     } else {
-                        $this->emitter->dispatch(self::NOT_OK_SEND_SETTLE, [$settleResProvider->getReturn(), $this->getMessage($settleResProvider->getReturn(), self::OPERATION_REQUEST)]);
+                        $this->emitter->dispatch(self::NOT_OK_SEND_SETTLE, [
+                            $settleResProvider->getReturn(),
+                            $this->getMessage($settleResProvider->getReturn(), self::OPERATION_REQUEST),
+                            $adviceResProvider
+                        ]);
                     }
                     $this->emitter->dispatch(self::AF_SEND_SETTLE, [$settleResProvider]);
                 } else {
                     $this->emitter->dispatch(self::DUPLICATE_SEND_ADVICE, [$adviceResProvider]);
                 }
             } else {
-                $this->emitter->dispatch(self::NOT_OK_SEND_ADVICE, [$result['return'], $this->getMessage($result['return'], self::OPERATION_REQUEST)]);
+                $this->emitter->dispatch(self::NOT_OK_SEND_ADVICE, [
+                    $result['return'],
+                    $this->getMessage($result['return'], self::OPERATION_REQUEST),
+                    $resProvider
+                ]);
             }
             $this->emitter->dispatch(self::AF_SEND_ADVICE, [$result]);
         } else {

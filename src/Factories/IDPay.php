@@ -144,7 +144,11 @@ class IDPay extends AbstractPayment
             if (empty($adviceProvider->getErrorCode())) {
                 $this->emitter->dispatch(self::OK_SEND_ADVICE, [$adviceProvider]);
             } else {
-                $this->emitter->dispatch(self::NOT_OK_SEND_ADVICE, [$adviceProvider->getErrorCode(), $this->getMessage($adviceProvider->getErrorCode(), self::OPERATION_VERIFY)]);
+                $this->emitter->dispatch(self::NOT_OK_SEND_ADVICE, [
+                    $adviceProvider->getErrorCode(),
+                    $this->getMessage($adviceProvider->getErrorCode(), self::OPERATION_VERIFY),
+                    $resProvider
+                ]);
             }
             $this->emitter->dispatch(self::AF_SEND_ADVICE, [$adviceProvider]);
         } else {

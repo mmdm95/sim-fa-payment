@@ -157,7 +157,11 @@ class Mabna extends AbstractPayment
                     $this->emitter->dispatch(self::DUPLICATE_SEND_ADVICE, [$adviceProvider]);
                 }
             } else {
-                $this->emitter->dispatch(self::NOT_OK_SEND_ADVICE, [$adviceProvider->getReturnId(), $this->getMessage($adviceProvider->getReturnId(), self::OPERATION_VERIFY)]);
+                $this->emitter->dispatch(self::NOT_OK_SEND_ADVICE, [
+                    $adviceProvider->getReturnId(),
+                    $this->getMessage($adviceProvider->getReturnId(), self::OPERATION_VERIFY),
+                    $resProvider
+                ]);
             }
             $this->emitter->dispatch(self::AF_SEND_ADVICE, [$adviceProvider]);
         } else {

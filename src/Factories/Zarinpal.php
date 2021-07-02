@@ -133,10 +133,18 @@ class Zarinpal extends AbstractPayment
             $this->emitter->dispatch(self::BF_SEND_ADVICE);
 
             if (empty($amount) || !is_numeric($amount)) {
-                $this->emitter->dispatch(self::NOT_OK_SEND_ADVICE, [-22, 'مبلغی برای احراز عملیات بانکی تعریف نشده است.']);
+                $this->emitter->dispatch(self::NOT_OK_SEND_ADVICE, [
+                    -22,
+                    'مبلغی برای احراز عملیات بانکی تعریف نشده است.',
+                    $resProvider
+                ]);
             }
             if (empty($authority)) {
-                $this->emitter->dispatch(self::NOT_OK_SEND_ADVICE, [-22, 'Authority برای احراز عملیات بانکی تعریف نشده است.']);
+                $this->emitter->dispatch(self::NOT_OK_SEND_ADVICE, [
+                    -22,
+                    'Authority برای احراز عملیات بانکی تعریف نشده است.',
+                    $resProvider
+                ]);
             }
 
             // add extra needed parameters to advice parameter provider
@@ -155,7 +163,11 @@ class Zarinpal extends AbstractPayment
                     $this->emitter->dispatch(self::FAILED_SEND_ADVICE, [-22, $this->getMessage(-22, self::OPERATION_REQUEST)]);
                 }
             } else {
-                $this->emitter->dispatch(self::NOT_OK_SEND_ADVICE, [-22, 'تراکنش توسط کاربر لغو شد.']);
+                $this->emitter->dispatch(self::NOT_OK_SEND_ADVICE, [
+                    -22,
+                    'تراکنش توسط کاربر لغو شد.',
+                    $resProvider
+                ]);
             }
 
             $this->emitter->dispatch(self::AF_SEND_ADVICE);

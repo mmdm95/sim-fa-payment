@@ -177,7 +177,11 @@ class Sadad extends AbstractPayment
             if ($adviceProvider->getResCode(-1) == 0) {
                 $this->emitter->dispatch(self::OK_SEND_ADVICE, [$adviceProvider]);
             } else {
-                $this->emitter->dispatch(self::NOT_OK_SEND_ADVICE, [$adviceProvider->getResCode(), 'تراکنش نا موفق بود در صورت کسر مبلغ از حساب شما حداکثر پس از 72 ساعت مبلغ به حسابتان برمی گردد.']);
+                $this->emitter->dispatch(self::NOT_OK_SEND_ADVICE, [
+                    $adviceProvider->getResCode(),
+                    'تراکنش نا موفق بود در صورت کسر مبلغ از حساب شما حداکثر پس از 72 ساعت مبلغ به حسابتان برمی گردد.',
+                    $resProvider
+                ]);
             }
             $this->emitter->dispatch(self::AF_SEND_ADVICE, [$adviceProvider]);
         } else {
