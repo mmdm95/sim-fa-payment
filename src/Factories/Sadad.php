@@ -145,7 +145,11 @@ class Sadad extends AbstractPayment
         if ($resProvider->getResCode(-1) == 0) {
             $this->emitter->dispatch(self::OK_CREATE_REQUEST, [$resProvider]);
         } else {
-            $this->emitter->dispatch(self::NOT_OK_CREATE_REQUEST, [$resProvider->getResCode(), $resProvider->getDescription()]);
+            $this->emitter->dispatch(self::NOT_OK_CREATE_REQUEST, [
+                $resProvider->getResCode(),
+                $resProvider->getDescription(),
+                $resProvider
+            ]);
         }
         $this->emitter->dispatch(self::AF_CREATE_REQUEST, [$resProvider]);
     }
