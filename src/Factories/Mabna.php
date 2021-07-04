@@ -156,9 +156,9 @@ class Mabna extends AbstractPayment
                 ($adviceProvider->getStatus() == 'OK' || $adviceProvider->getStatus() == 'Duplicate')
             ) {
                 if ($adviceProvider->getStatus() == 'OK') {
-                    $this->emitter->dispatch(self::OK_SEND_ADVICE, [$adviceProvider]);
+                    $this->emitter->dispatch(self::OK_SEND_ADVICE, [$adviceProvider, $resProvider]);
                 } else {
-                    $this->emitter->dispatch(self::DUPLICATE_SEND_ADVICE, [$adviceProvider]);
+                    $this->emitter->dispatch(self::DUPLICATE_SEND_ADVICE, [$adviceProvider, $resProvider]);
                 }
             } else {
                 $this->emitter->dispatch(self::NOT_OK_SEND_ADVICE, [

@@ -179,7 +179,7 @@ class Sadad extends AbstractPayment
 
             $adviceProvider = new SadadAdviceResultProvider($result['response']);
             if ($adviceProvider->getResCode(-1) == 0) {
-                $this->emitter->dispatch(self::OK_SEND_ADVICE, [$adviceProvider]);
+                $this->emitter->dispatch(self::OK_SEND_ADVICE, [$adviceProvider, $resProvider]);
             } else {
                 $this->emitter->dispatch(self::NOT_OK_SEND_ADVICE, [
                     $adviceProvider->getResCode(),

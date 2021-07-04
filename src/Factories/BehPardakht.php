@@ -267,7 +267,11 @@ class BehPardakht extends AbstractPayment
                     $settleResProvider = new BehPardakhtSettleResultProvider($result);
 
                     if (!empty($settleResProvider->getReturn()) && $settleResProvider->getReturn() == 0) {
-                        $this->emitter->dispatch(self::OK_SEND_SETTLE, [$settleResProvider]);
+                        $this->emitter->dispatch(self::OK_SEND_SETTLE, [
+                            $settleResProvider,
+                            $adviceResProvider,
+                            $resProvider
+                        ]);
                     } else {
                         $this->emitter->dispatch(self::NOT_OK_SEND_SETTLE, [
                             $settleResProvider->getReturn(),

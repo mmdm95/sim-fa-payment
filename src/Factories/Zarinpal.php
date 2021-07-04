@@ -157,12 +157,13 @@ class Zarinpal extends AbstractPayment
 
                 $adviceProvider = new ZarinpalAdviceResultProvider($result);
                 if ($adviceProvider->getStatus() == 100) {
-                    $this->emitter->dispatch(self::OK_SEND_ADVICE, [$adviceProvider]);
+                    $this->emitter->dispatch(self::OK_SEND_ADVICE, [$adviceProvider, $resProvider]);
                 } else if ($adviceProvider->getStatus() == 101) {
                     $this->emitter->dispatch(self::DUPLICATE_SEND_ADVICE, [
                         101,
                         $this->getMessage(101, self::OPERATION_REQUEST),
-                        $adviceProvider
+                        $adviceProvider,
+                        $resProvider
                     ]);
                 } else {
                     $this->emitter->dispatch(self::NOT_OK_SEND_ADVICE, [
