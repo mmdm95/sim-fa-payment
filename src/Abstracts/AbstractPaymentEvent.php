@@ -53,7 +53,7 @@ abstract class AbstractPaymentEvent
         $this->event_provider->addEvent(new Event(self::OK_HANDLE_RESULT));
         $this->event_provider->addEvent(new Event(self::NOT_OK_HANDLE_RESULT));
 
-        $this->emitter = new Emitter($eventProvider);
+        $this->emitter = new Emitter($this->event_provider);
     }
 
     /**
