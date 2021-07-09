@@ -16,7 +16,7 @@ class HeaderProvider
      */
     public function addHeader(string $name, string $value)
     {
-        if (!is_array($this->headers[$name])) {
+        if (!isset($this->headers[$name]) || !is_array($this->headers[$name])) {
             $this->headers[$name] = [];
         }
 
@@ -30,7 +30,7 @@ class HeaderProvider
      */
     public function contentLength(string $content_length)
     {
-        if (!is_array($this->headers['Content-Length'])) {
+        if (!isset($this->headers['Content-Length']) || !is_array($this->headers['Content-Length'])) {
             $this->headers['Content-Length'] = [];
         }
 
@@ -44,7 +44,7 @@ class HeaderProvider
      */
     public function contentType(string $content_type)
     {
-        if (!is_array($this->headers['Content-Type'])) {
+        if (!isset($this->headers['Content-Type']) || !is_array($this->headers['Content-Type'])) {
             $this->headers['Content-Type'] = [];
         }
 
@@ -58,7 +58,7 @@ class HeaderProvider
      */
     public function contentEncoding(string $content_encoding)
     {
-        if (!is_array($this->headers['Content-Encoding'])) {
+        if (!isset($this->headers['Content-Encoding']) || !is_array($this->headers['Content-Encoding'])) {
             $this->headers['Content-Encoding'] = [];
         }
 
@@ -72,7 +72,7 @@ class HeaderProvider
      */
     public function age(string $age)
     {
-        if (!is_array($this->headers['Age'])) {
+        if (!isset($this->headers['Age']) || !is_array($this->headers['Age'])) {
             $this->headers['Age'] = [];
         }
 
@@ -86,7 +86,7 @@ class HeaderProvider
      */
     public function cacheControl(string $cache_control)
     {
-        if (!is_array($this->headers['Cache-Control'])) {
+        if (!isset($this->headers['Cache-Control']) || !is_array($this->headers['Cache-Control'])) {
             $this->headers['Cache-Control'] = [];
         }
 
@@ -100,7 +100,7 @@ class HeaderProvider
      */
     public function expires(string $expires)
     {
-        if (!is_array($this->headers['Expires'])) {
+        if (!isset($this->headers['Expires']) || !is_array($this->headers['Expires'])) {
             $this->headers['Expires'] = [];
         }
 
@@ -114,7 +114,7 @@ class HeaderProvider
      */
     public function pragma(string $pragma)
     {
-        if (!is_array($this->headers['Pragma'])) {
+        if (!isset($this->headers['Pragma']) || !is_array($this->headers['Pragma'])) {
             $this->headers['Pragma'] = [];
         }
 
@@ -128,7 +128,7 @@ class HeaderProvider
      */
     public function eTag(string $eTag)
     {
-        if (!is_array($this->headers['ETag'])) {
+        if (!isset($this->headers['ETag']) || !is_array($this->headers['ETag'])) {
             $this->headers['ETag'] = [];
         }
 
