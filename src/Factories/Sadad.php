@@ -141,8 +141,8 @@ class Sadad extends AbstractPayment
             );
         $result = $this->request($provider->getParameters(), $this->urls['payment']);
         $resProvider = new SadadRequestResultProvider($result['response']);
-
-        if ($resProvider->getResCode(-1) == 0) {
+        // res code is null on success(this is not documented! shame on them)
+        if ($resProvider->getResCode() == 0) {
             $this->emitter->dispatch(self::OK_CREATE_REQUEST, [$resProvider]);
         } else {
             $this->emitter->dispatch(self::NOT_OK_CREATE_REQUEST, [
