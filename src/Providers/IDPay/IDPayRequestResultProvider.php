@@ -12,9 +12,9 @@ class IDPayRequestResultProvider extends AbstractBaseParameterProvider
      */
     public function __construct($data)
     {
-        $this->parameters['id'] = $data['id'];
-        $this->parameters['link'] = $data['link'];
-        $this->parameters['error_code'] = $data['error_code'];
+        $this->parameters['id'] = $data['id'] ?? null;
+        $this->parameters['link'] = $data['link'] ?? null;
+        $this->parameters['error_code'] = $data['error_code'] ?? null;
         $this->addExtraParameters($data);
     }
 

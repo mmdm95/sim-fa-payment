@@ -12,9 +12,9 @@ class SadadHandlerProvider extends AbstractBaseParameterProvider
      */
     public function __construct(array $data)
     {
-        $this->parameters['OrderId'] = $data['OrderId'];
-        $this->parameters['token'] = $data['token'];
-        $this->parameters['ResCode'] = $data['ResCode'];
+        $this->parameters['OrderId'] = $data['OrderId'] ?? null;
+        $this->parameters['token'] = $data['token'] ?? null;
+        $this->parameters['ResCode'] = $data['ResCode'] ?? null;
         $this->addExtraParameters($data);
     }
 
