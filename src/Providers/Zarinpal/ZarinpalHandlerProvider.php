@@ -12,8 +12,8 @@ class ZarinpalHandlerProvider extends AbstractBaseParameterProvider
      */
     public function __construct(array $data)
     {
-        $this->parameters['Status'] = $data['Status'] ?? null;
-        $this->parameters['Authority'] = $data['Authority'] ?? null;
+        $this->parameters['Status'] = isset($data['Status']) ? $data['Status'] : null;
+        $this->parameters['Authority'] = isset($data['Authority']) ? $data['Authority'] : null;
         $this->addExtraParameters($data);
     }
 
@@ -23,7 +23,7 @@ class ZarinpalHandlerProvider extends AbstractBaseParameterProvider
      */
     public function getStatus($prefer = null)
     {
-        return $this->parameters['Status'] ?: $prefer;
+        return isset($this->parameters['Status']) ? $this->parameters['Status'] : $prefer;
     }
 
     /**
@@ -32,6 +32,6 @@ class ZarinpalHandlerProvider extends AbstractBaseParameterProvider
      */
     public function getAuthority($prefer = null)
     {
-        return $this->parameters['Authority'] ?: $prefer;
+        return isset($this->parameters['Authority']) ? $this->parameters['Authority'] : $prefer;
     }
 }

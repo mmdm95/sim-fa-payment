@@ -109,7 +109,7 @@ class Mabna extends AbstractPayment
         $result = $this->request($provider->getParameters(), $this->urls['get_token']);
         $resProvider = new MabnaRequestResultProvider(array_merge($result['response'], ['Url' => $this->urls['payment']]));
 
-        if (!empty($resProvider->getStatus()) && !empty($resProvider->getAccessToken()) && $resProvider->getStatus() == 0) {
+        if (!is_null($resProvider->getStatus()) && !is_null($resProvider->getAccessToken()) && $resProvider->getStatus() == 0) {
             $this->emitter->dispatch(self::OK_CREATE_REQUEST, [$resProvider]);
         } else {
             $this->emitter->dispatch(self::NOT_OK_CREATE_REQUEST, [
@@ -134,11 +134,11 @@ class Mabna extends AbstractPayment
         $resProvider = new MabnaHandlerProvider($this->handleRequest($this->gateway_variables_name[self::OPERATION_REQUEST]));
 
         if (
-            !empty($resProvider->getRespCode()) && !empty($resProvider->getRespMsg()) && !empty($resProvider->getAmount()) &&
-            !empty($resProvider->getPayload()) && !empty($resProvider->getTerminalId()) && !empty($resProvider->getTraceNumber()) &&
-            !empty($resProvider->getRRN()) && !empty($resProvider->getDatePaid()) && !empty($resProvider->getDigitalReceipt()) &&
-            !empty($resProvider->getIssuerBank()) && !empty($resProvider->getPayId()) &&
-            !empty($resProvider->getCardNumber()) && !empty($resProvider->getInvoiceId()) &&
+            !is_null($resProvider->getRespCode()) && !is_null($resProvider->getRespMsg()) && !is_null($resProvider->getAmount()) &&
+            !is_null($resProvider->getPayload()) && !is_null($resProvider->getTerminalId()) && !is_null($resProvider->getTraceNumber()) &&
+            !is_null($resProvider->getRRN()) && !is_null($resProvider->getDatePaid()) && !is_null($resProvider->getDigitalReceipt()) &&
+            !is_null($resProvider->getIssuerBank()) && !is_null($resProvider->getPayId()) &&
+            !is_null($resProvider->getCardNumber()) && !is_null($resProvider->getInvoiceId()) &&
             $resProvider->getRespCode() == 0 && $resProvider->getTerminalId() == $this->parameters['terminalID']
         ) {
             $this->emitter->dispatch(self::OK_HANDLE_RESULT, [$resProvider]);
@@ -152,7 +152,7 @@ class Mabna extends AbstractPayment
             $result = $this->request($provider->getParameters(), $this->urls['verify']);
 
             $adviceProvider = new MabnaAdviceResultProvider($result['response']);
-            if (!empty($adviceProvider->getStatus()) &&
+            if (!is_null($adviceProvider->getStatus()) &&
                 ($adviceProvider->getStatus() == 'OK' || $adviceProvider->getStatus() == 'Duplicate')
             ) {
                 if ($adviceProvider->getStatus() == 'OK') {

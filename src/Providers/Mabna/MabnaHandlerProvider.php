@@ -12,19 +12,19 @@ class MabnaHandlerProvider extends AbstractBaseParameterProvider
      */
     public function __construct(array $data)
     {
-        $this->parameters['respcode'] = $data['respcode'];
-        $this->parameters['respmsg'] = $data['respmsg'];
-        $this->parameters['amount'] = $data['amount'];
-        $this->parameters['payload'] = $data['payload'];
-        $this->parameters['terminalid'] = $data['terminalid'];
-        $this->parameters['tracenumber'] = $data['tracenumber'];
-        $this->parameters['rrn'] = $data['rrn'];
-        $this->parameters['datePaid'] = $data['datePaid'];
-        $this->parameters['digitalreceipt'] = $data['digitalreceipt'];
-        $this->parameters['issuerbank'] = $data['issuerbank'];
-        $this->parameters['payid'] = $data['payid'];
-        $this->parameters['cardnumber'] = $data['cardnumber'];
-        $this->parameters['invoiceid'] = $data['invoiceid'];
+        $this->parameters['respcode'] = isset($data['respcode']) ? $data['respcode'] : null;
+        $this->parameters['respmsg'] = isset($data['respmsg']) ? $data['respmsg'] : null;
+        $this->parameters['amount'] = isset($data['amount']) ? $data['amount'] : null;
+        $this->parameters['payload'] = isset($data['payload']) ? $data['payload'] : null;
+        $this->parameters['terminalid'] = isset($data['terminalid']) ? $data['terminalid'] : null;
+        $this->parameters['tracenumber'] = isset($data['tracenumber']) ? $data['tracenumber'] : null;
+        $this->parameters['rrn'] = isset($data['rrn']) ? $data['rrn'] : null;
+        $this->parameters['datePaid'] = isset($data['datePaid']) ? $data['datePaid'] : null;
+        $this->parameters['digitalreceipt'] = isset($data['digitalreceipt']) ? $data['digitalreceipt'] : null;
+        $this->parameters['issuerbank'] = isset($data['issuerbank']) ? $data['issuerbank'] : null;
+        $this->parameters['payid'] = isset($data['payid']) ? $data['payid'] : null;
+        $this->parameters['cardnumber'] = isset($data['cardnumber']) ? $data['cardnumber'] : null;
+        $this->parameters['invoiceid'] = isset($data['invoiceid']) ? $data['invoiceid'] : null;
         $this->addExtraParameters($data);
     }
 
@@ -34,7 +34,7 @@ class MabnaHandlerProvider extends AbstractBaseParameterProvider
      */
     public function getRespCode($prefer = null)
     {
-        return $this->parameters['respcode'] ?: $prefer;
+        return isset($this->parameters['respcode']) ? $this->parameters['respcode'] : $prefer;
     }
 
     /**
@@ -43,7 +43,7 @@ class MabnaHandlerProvider extends AbstractBaseParameterProvider
      */
     public function getRespMsg($prefer = null)
     {
-        return $this->parameters['respmsg'] ?: $prefer;
+        return isset($this->parameters['respmsg']) ? $this->parameters['respmsg'] : $prefer;
     }
 
     /**
@@ -52,7 +52,7 @@ class MabnaHandlerProvider extends AbstractBaseParameterProvider
      */
     public function getAmount($prefer = null)
     {
-        return $this->parameters['amount'] ?: $prefer;
+        return isset($this->parameters['amount']) ? $this->parameters['amount'] : $prefer;
     }
 
     /**
@@ -61,7 +61,7 @@ class MabnaHandlerProvider extends AbstractBaseParameterProvider
      */
     public function getPayload($prefer = null)
     {
-        return $this->parameters['payload'] ?: $prefer;
+        return isset($this->parameters['payload']) ? $this->parameters['payload'] : $prefer;
     }
 
     /**
@@ -70,7 +70,7 @@ class MabnaHandlerProvider extends AbstractBaseParameterProvider
      */
     public function getTerminalId($prefer = null)
     {
-        return $this->parameters['terminalid'] ?: $prefer;
+        return isset($this->parameters['terminalid']) ? $this->parameters['terminalid'] : $prefer;
     }
 
     /**
@@ -79,7 +79,7 @@ class MabnaHandlerProvider extends AbstractBaseParameterProvider
      */
     public function getTraceNumber($prefer = null)
     {
-        return $this->parameters['tracenumber'] ?: $prefer;
+        return isset($this->parameters['tracenumber']) ? $this->parameters['tracenumber'] : $prefer;
     }
 
     /**
@@ -88,7 +88,7 @@ class MabnaHandlerProvider extends AbstractBaseParameterProvider
      */
     public function getRRN($prefer = null)
     {
-        return $this->parameters['rrn'] ?: $prefer;
+        return isset($this->parameters['rrn']) ? $this->parameters['rrn'] : $prefer;
     }
 
     /**
@@ -97,7 +97,7 @@ class MabnaHandlerProvider extends AbstractBaseParameterProvider
      */
     public function getDatePaid($prefer = null)
     {
-        return $this->parameters['datePaid'] ?: $prefer;
+        return isset($this->parameters['datePaid']) ? $this->parameters['datePaid'] : $prefer;
     }
 
     /**
@@ -106,7 +106,7 @@ class MabnaHandlerProvider extends AbstractBaseParameterProvider
      */
     public function getDigitalReceipt($prefer = null)
     {
-        return $this->parameters['digitalreceipt'] ?: $prefer;
+        return isset($this->parameters['digitalreceipt']) ? $this->parameters['digitalreceipt'] : $prefer;
     }
 
     /**
@@ -115,7 +115,7 @@ class MabnaHandlerProvider extends AbstractBaseParameterProvider
      */
     public function getIssuerBank($prefer = null)
     {
-        return $this->parameters['issuerbank'] ?: $prefer;
+        return isset($this->parameters['issuerbank']) ? $this->parameters['issuerbank'] : $prefer;
     }
 
     /**
@@ -124,7 +124,7 @@ class MabnaHandlerProvider extends AbstractBaseParameterProvider
      */
     public function getPayId($prefer = null)
     {
-        return $this->parameters['payid'] ?: $prefer;
+        return isset($this->parameters['payid']) ? $this->parameters['payid'] : $prefer;
     }
 
     /**
@@ -133,7 +133,7 @@ class MabnaHandlerProvider extends AbstractBaseParameterProvider
      */
     public function getCardNumber($prefer = null)
     {
-        return $this->parameters['cardnumber'] ?: $prefer;
+        return isset($this->parameters['cardnumber']) ? $this->parameters['cardnumber'] : $prefer;
     }
 
     /**
@@ -142,6 +142,6 @@ class MabnaHandlerProvider extends AbstractBaseParameterProvider
      */
     public function getInvoiceId($prefer = null)
     {
-        return $this->parameters['invoiceid'] ?: $prefer;
+        return isset($this->parameters['invoiceid']) ? $this->parameters['invoiceid'] : $prefer;
     }
 }

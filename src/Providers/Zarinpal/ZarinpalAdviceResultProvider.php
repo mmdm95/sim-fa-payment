@@ -12,8 +12,8 @@ class ZarinpalAdviceResultProvider extends AbstractBaseParameterProvider
      */
     public function __construct(array $data)
     {
-        $this->parameters['Status'] = $data['Status'] ?? null;
-        $this->parameters['RefID'] = $data['RefID'] ?? null;
+        $this->parameters['Status'] = isset($data['Status']) ? $data['Status'] : null;
+        $this->parameters['RefID'] = isset($data['RefID']) ? $data['RefID'] : null;
         $this->addExtraParameters($data);
     }
 
@@ -23,7 +23,7 @@ class ZarinpalAdviceResultProvider extends AbstractBaseParameterProvider
      */
     public function getStatus($prefer = null)
     {
-        return $this->parameters['Status'] ?: $prefer;
+        return isset($this->parameters['Status']) ? $this->parameters['Status'] : $prefer;
     }
 
     /**
@@ -32,6 +32,6 @@ class ZarinpalAdviceResultProvider extends AbstractBaseParameterProvider
      */
     public function getRefID($prefer = null)
     {
-        return $this->parameters['RefID'] ?: $prefer;
+        return isset($this->parameters['RefID']) ? $this->parameters['RefID'] : $prefer;
     }
 }

@@ -210,7 +210,7 @@ class BehPardakht extends AbstractPayment
             'ResCode' => $resCode,
         ]);
 
-        if (!empty($resProvider->getResCode()) && $resProvider->getResCode() == 0) {
+        if ($resProvider->getResCode(-1) == 0) {
             $this->emitter->dispatch(self::OK_CREATE_REQUEST, [$resProvider]);
         } else {
             $this->emitter->dispatch(self::NOT_OK_CREATE_REQUEST, [
@@ -231,7 +231,11 @@ class BehPardakht extends AbstractPayment
 
         $resProvider = new BehPardakhtHandlerProvider($this->handleRequest($this->gateway_variables_name[self::OPERATION_REQUEST]));
 
-        if (!empty($resProvider->getRefId()) && !empty($resProvider->getResCode()) && !empty($resProvider->getSaleOrderId())) {
+        if (
+            !is_null($resProvider->getRefId()) &&
+            $resProvider->getResCode(-1000) != -1000 &&
+            !is_null($resProvider->getSaleOrderId())
+        ) {
             $this->emitter->dispatch(self::OK_HANDLE_RESULT, [$resProvider]);
 
             $this->emitter->dispatch(self::BF_SEND_ADVICE, [$resProvider]);
@@ -247,8 +251,8 @@ class BehPardakht extends AbstractPayment
             ]);
 
             $adviceResProvider = new BehPardakhtAdviceResultProvider($result);
-            if ($adviceResProvider->getReturn() == 0 || $adviceResProvider->getReturn() == 51) {
-                if ($adviceResProvider->getReturn() == 0) {
+            if ($adviceResProvider->getReturn(-1000) == 0 || $adviceResProvider->getReturn() == 51) {
+                if ($adviceResProvider->getReturn(-1000) == 0) {
                     $this->emitter->dispatch(self::OK_SEND_ADVICE, [$adviceResProvider, $resProvider]);
 
                     $this->emitter->dispatch(self::BF_SEND_SETTLE, [$adviceResProvider, $resProvider]);
@@ -266,7 +270,7 @@ class BehPardakht extends AbstractPayment
 
                     $settleResProvider = new BehPardakhtSettleResultProvider($result);
 
-                    if (!empty($settleResProvider->getReturn()) && $settleResProvider->getReturn() == 0) {
+                    if ($settleResProvider->getReturn(-1000) == 0) {
                         $this->emitter->dispatch(self::OK_SEND_SETTLE, [
                             $settleResProvider,
                             $adviceResProvider,

@@ -12,10 +12,10 @@ class BehPardakhtHandlerProvider extends AbstractBaseParameterProvider
      */
     public function __construct(array $data)
     {
-        $this->parameters['RefId'] = $data['RefId'] ?? null;
-        $this->parameters['ResCode'] = $data['ResCode'] ?? null;
-        $this->parameters['SaleOrderId'] = $data['SaleOrderId'] ?? null;
-        $this->parameters['SaleReferenceId'] = $data['SaleReferenceId'] ?? null;
+        $this->parameters['RefId'] = isset($data['RefId']) ? $data['RefId'] : null;
+        $this->parameters['ResCode'] = isset($data['ResCode']) ? $data['ResCode'] : null;
+        $this->parameters['SaleOrderId'] = isset($data['SaleOrderId']) ? $data['SaleOrderId'] : null;
+        $this->parameters['SaleReferenceId'] = isset($data['SaleReferenceId']) ? $data['SaleReferenceId'] : null;
         $this->addExtraParameters($data);
     }
 
@@ -25,7 +25,7 @@ class BehPardakhtHandlerProvider extends AbstractBaseParameterProvider
      */
     public function getRefId($prefer = null)
     {
-        return $this->parameters['RefId'] ?: $prefer;
+        return isset($this->parameters['RefId']) ? $this->parameters['RefId'] : $prefer;
     }
 
     /**
@@ -34,7 +34,7 @@ class BehPardakhtHandlerProvider extends AbstractBaseParameterProvider
      */
     public function getResCode($prefer = null)
     {
-        return $this->parameters['ResCode'] ?: $prefer;
+        return isset($this->parameters['ResCode']) ? $this->parameters['ResCode'] : $prefer;
     }
 
     /**
@@ -43,7 +43,7 @@ class BehPardakhtHandlerProvider extends AbstractBaseParameterProvider
      */
     public function getSaleOrderId($prefer = null)
     {
-        return $this->parameters['SaleOrderId'] ?: $prefer;
+        return isset($this->parameters['SaleOrderId']) ? $this->parameters['SaleOrderId'] : $prefer;
     }
 
     /**
@@ -52,6 +52,6 @@ class BehPardakhtHandlerProvider extends AbstractBaseParameterProvider
      */
     public function getSaleReferenceId($prefer = null)
     {
-        return $this->parameters['SaleReferenceId'] ?: $prefer;
+        return isset($this->parameters['SaleReferenceId']) ? $this->parameters['SaleReferenceId'] : $prefer;
     }
 }

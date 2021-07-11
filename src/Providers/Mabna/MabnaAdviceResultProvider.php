@@ -12,9 +12,9 @@ class MabnaAdviceResultProvider extends AbstractBaseParameterProvider
      */
     public function __construct(array $data)
     {
-        $this->parameters['Status'] = $data['Status'] ?? null;
-        $this->parameters['ReturnId'] = $data['ReturnId'] ?? null;
-        $this->parameters['Message'] = $data['Message'] ?? null;
+        $this->parameters['Status'] = isset($data['Status']) ? $data['Status'] : null;
+        $this->parameters['ReturnId'] = isset($data['ReturnId']) ? $data['ReturnId'] : null;
+        $this->parameters['Message'] = isset($data['Message']) ? $data['Message'] : null;
         $this->addExtraParameters($data);
     }
 
@@ -24,7 +24,7 @@ class MabnaAdviceResultProvider extends AbstractBaseParameterProvider
      */
     public function getStatus($prefer = null)
     {
-        return $this->parameters['Status'] ?: $prefer;
+        return isset($this->parameters['Status']) ? $this->parameters['Status'] : $prefer;
     }
 
     /**
@@ -33,7 +33,7 @@ class MabnaAdviceResultProvider extends AbstractBaseParameterProvider
      */
     public function getReturnId($prefer = null)
     {
-        return $this->parameters['ReturnId'] ?: $prefer;
+        return isset($this->parameters['ReturnId']) ? $this->parameters['ReturnId'] : $prefer;
     }
 
     /**
@@ -42,6 +42,6 @@ class MabnaAdviceResultProvider extends AbstractBaseParameterProvider
      */
     public function getMessage($prefer = null)
     {
-        return $this->parameters['Message'] ?: $prefer;
+        return isset($this->parameters['Message']) ? $this->parameters['Message'] : $prefer;
     }
 }

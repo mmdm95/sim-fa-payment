@@ -109,7 +109,7 @@ class IDPay extends AbstractPayment
         $result = $this->request($provider->getParameters(), $this->urls['payment']);
         $resProvider = new IDPayRequestResultProvider($result['response']);
 
-        if (empty($resProvider->getErrorCode()) && !empty($resProvider->getId()) && !empty($resProvider->getLink())
+        if (is_null($resProvider->getErrorCode()) && !is_null($resProvider->getId()) && !is_null($resProvider->getLink())
         ) {
             $this->emitter->dispatch(self::OK_CREATE_REQUEST, [$resProvider]);
         } else {
@@ -133,7 +133,7 @@ class IDPay extends AbstractPayment
 
         $resProvider = new IDPayHandlerProvider($this->handleRequest($this->gateway_variables_name[self::OPERATION_REQUEST]));
 
-        if (!empty($resProvider->getOrderId()) && !empty($resProvider->getStatus())) {
+        if (!is_null($resProvider->getOrderId()) && !is_null($resProvider->getStatus())) {
             $this->emitter->dispatch(self::OK_HANDLE_RESULT, [$resProvider]);
 
             $this->emitter->dispatch(self::BF_SEND_ADVICE, [$resProvider]);
@@ -145,7 +145,7 @@ class IDPay extends AbstractPayment
             $result = $this->request($provider->getParameters(), $this->urls['verify']);
 
             $adviceProvider = new IDPayAdviceResultProvider($result['response']);
-            if (empty($adviceProvider->getErrorCode())) {
+            if (is_null($adviceProvider->getErrorCode())) {
                 $this->emitter->dispatch(self::OK_SEND_ADVICE, [$adviceProvider, $resProvider]);
             } else {
                 $this->emitter->dispatch(self::NOT_OK_SEND_ADVICE, [
@@ -184,7 +184,7 @@ class IDPay extends AbstractPayment
         $headerProvider->contentType('application/json');
         $headerProvider->addHeader('X-API-KEY', $this->parameters['APIKey']);
 
-        if (!empty($this->parameters['mode']) &&
+        if (!is_null($this->parameters['mode']) &&
             $this->parameters['mode'] == self::MODE_DEVELOPMENT) {
             $headerProvider->addHeader('X-SANDBOX', 1);
         }

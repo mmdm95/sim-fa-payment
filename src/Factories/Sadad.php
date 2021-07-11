@@ -165,8 +165,12 @@ class Sadad extends AbstractPayment
 
         $resProvider = new SadadHandlerProvider($this->handleRequest($this->gateway_variables_name[self::OPERATION_REQUEST]));
 
-        if (!empty($resProvider->getOrderId()) && !empty($resProvider->getToken()) &&
-            !empty($resProvider->getResCode()) && $resProvider->getResCode(-1) == 0) {
+        if (
+            !is_null($resProvider->getOrderId()) &&
+            !is_null($resProvider->getToken()) &&
+            !is_null($resProvider->getResCode()) &&
+            $resProvider->getResCode(-1) == 0
+        ) {
             $this->emitter->dispatch(self::OK_HANDLE_RESULT, [$resProvider]);
 
             $this->emitter->dispatch(self::BF_SEND_ADVICE, [$resProvider]);

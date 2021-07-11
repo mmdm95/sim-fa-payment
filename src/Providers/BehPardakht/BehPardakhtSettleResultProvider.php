@@ -12,7 +12,7 @@ class BehPardakhtSettleResultProvider extends AbstractBaseParameterProvider
      */
     public function __construct(array $data)
     {
-        $this->parameters['return'] = $data['return'] ?? null;
+        $this->parameters['return'] = isset($data['return']) ? $data['return'] : null;
         $this->addExtraParameters($data);
     }
 
@@ -22,6 +22,6 @@ class BehPardakhtSettleResultProvider extends AbstractBaseParameterProvider
      */
     public function getReturn($prefer = null)
     {
-        return $this->parameters['return'] ?: $prefer;
+        return isset($this->parameters['return']) ? $this->parameters['return'] : $prefer;
     }
 }

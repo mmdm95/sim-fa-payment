@@ -127,18 +127,18 @@ class Zarinpal extends AbstractPayment
 
         $resProvider = new ZarinpalHandlerProvider($this->handleRequest($this->gateway_variables_name[self::OPERATION_REQUEST]));
 
-        if (!empty($resProvider->getStatus()) || !empty($resProvider->getAuthority())) {
+        if (!is_null($resProvider->getStatus()) || !is_null($resProvider->getAuthority())) {
             $this->emitter->dispatch(self::OK_HANDLE_RESULT, [$resProvider]);
 
             $amount = $provider->getParameter('Amount');
-            if (empty($amount) || !is_numeric($amount)) {
+            if (is_null($amount) || !is_numeric($amount)) {
                 $this->emitter->dispatch(self::FAILED_SEND_ADVICE, [
                     -22,
                     'مبلغی برای احراز عملیات بانکی تعریف نشده است.',
                     $resProvider
                 ]);
             }
-            if (empty($resProvider->getAuthority())) {
+            if (is_null($resProvider->getAuthority())) {
                 $this->emitter->dispatch(self::FAILED_SEND_ADVICE, [
                     -22,
                     'Authority برای احراز عملیات بانکی تعریف نشده است.',

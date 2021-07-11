@@ -12,9 +12,9 @@ class MabnaRequestResultProvider extends AbstractBaseParameterProvider
      */
     public function __construct(array $data)
     {
-        $this->parameters['Status'] = $data['Status'] ?? null;
-        $this->parameters['AccessToken'] = $data['AccessToken'] ?? null;
-        $this->parameters['Url'] = $data['Url'] ?? null;
+        $this->parameters['Status'] = isset($data['Status']) ? $data['Status'] : null;
+        $this->parameters['AccessToken'] = isset($data['AccessToken']) ? $data['AccessToken'] : null;
+        $this->parameters['Url'] = isset($data['Url']) ? $data['Url'] : null;
         $this->addExtraParameters($data);
     }
 
@@ -24,7 +24,7 @@ class MabnaRequestResultProvider extends AbstractBaseParameterProvider
      */
     public function getStatus($prefer = null)
     {
-        return $this->parameters['Status'] ?: $prefer;
+        return isset($this->parameters['Status']) ? $this->parameters['Status'] : $prefer;
     }
 
     /**
@@ -33,7 +33,7 @@ class MabnaRequestResultProvider extends AbstractBaseParameterProvider
      */
     public function getAccessToken($prefer = null)
     {
-        return $this->parameters['AccessToken'] ?: $prefer;
+        return isset($this->parameters['AccessToken']) ? $this->parameters['AccessToken'] : $prefer;
     }
 
     /**
@@ -42,6 +42,6 @@ class MabnaRequestResultProvider extends AbstractBaseParameterProvider
      */
     public function getUrl($prefer = null)
     {
-        return $this->parameters['Url'] ?: $prefer;
+        return isset($this->parameters['Url']) ? $this->parameters['Url'] : $prefer;
     }
 }

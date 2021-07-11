@@ -12,9 +12,9 @@ class IDPayAdviceResultProvider extends AbstractBaseParameterProvider
      */
     public function __construct(array $data)
     {
-        $this->parameters['status'] = $data['status'] ?? null;
-        $this->parameters['track_id'] = $data['payment']['track_id'] ?? null;
-        $this->parameters['error_code'] = $data['error_code'] ?? null;
+        $this->parameters['status'] = isset($data['status']) ? $data['status'] : null;
+        $this->parameters['track_id'] = isset($data['payment']['track_id']) ? $data['payment']['track_id'] : null;
+        $this->parameters['error_code'] = isset($data['error_code']) ? $data['error_code'] : null;
         $this->addExtraParameters($data);
     }
 
@@ -24,7 +24,7 @@ class IDPayAdviceResultProvider extends AbstractBaseParameterProvider
      */
     public function getStatus($prefer = null)
     {
-        return $this->parameters['status'] ?: $prefer;
+        return isset($this->parameters['status']) ? $this->parameters['status'] : $prefer;
     }
 
     /**
@@ -33,7 +33,7 @@ class IDPayAdviceResultProvider extends AbstractBaseParameterProvider
      */
     public function getTrackId($prefer = null)
     {
-        return $this->parameters['track_id'] ?: $prefer;
+        return isset($this->parameters['track_id']) ? $this->parameters['track_id'] : $prefer;
     }
 
     /**
@@ -42,6 +42,6 @@ class IDPayAdviceResultProvider extends AbstractBaseParameterProvider
      */
     public function getErrorCode($prefer = null)
     {
-        return $this->parameters['error_code'] ?: $prefer;
+        return isset($this->parameters['error_code']) ? $this->parameters['error_code'] : $prefer;
     }
 }

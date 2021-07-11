@@ -12,12 +12,12 @@ class SadadAdviceResultProvider extends AbstractBaseParameterProvider
      */
     public function __construct($data)
     {
-        $this->parameters['ResCode'] = $data['ResCode'] ?? null;
-        $this->parameters['RetrivalRefNo'] = $data['RetrivalRefNo'] ?? null;
-        $this->parameters['SystemTraceNo'] = $data['SystemTraceNo'] ?? null;
-        $this->parameters['Amount'] = $data['Amount'] ?? null;
-        $this->parameters['Description'] = $data['Description'] ?? null;
-        $this->parameters['OrderId'] = $data['OrderId'] ?? null;
+        $this->parameters['ResCode'] = isset($data['ResCode']) ? $data['ResCode'] : null;
+        $this->parameters['RetrivalRefNo'] = isset($data['RetrivalRefNo']) ? $data['RetrivalRefNo'] : null;
+        $this->parameters['SystemTraceNo'] = isset($data['SystemTraceNo']) ? $data['SystemTraceNo'] : null;
+        $this->parameters['Amount'] = isset($data['Amount']) ? $data['Amount'] : null;
+        $this->parameters['Description'] = isset($data['Description']) ? $data['Description'] : null;
+        $this->parameters['OrderId'] = isset($data['OrderId']) ? $data['OrderId'] : null;
         $this->addExtraParameters($data);
     }
 
@@ -27,7 +27,7 @@ class SadadAdviceResultProvider extends AbstractBaseParameterProvider
      */
     public function getResCode($prefer = null)
     {
-        return $this->parameters['ResCode'] ?: $prefer;
+        return isset($this->parameters['ResCode']) ? $this->parameters['ResCode'] : $prefer;
     }
 
     /**
@@ -36,7 +36,7 @@ class SadadAdviceResultProvider extends AbstractBaseParameterProvider
      */
     public function getRetrivalRefNo($prefer = null)
     {
-        return $this->parameters['RetrivalRefNo'] ?: $prefer;
+        return isset($this->parameters['RetrivalRefNo']) ? $this->parameters['RetrivalRefNo'] : $prefer;
     }
 
     /**
@@ -45,7 +45,7 @@ class SadadAdviceResultProvider extends AbstractBaseParameterProvider
      */
     public function getSystemTraceNo($prefer = null)
     {
-        return $this->parameters['SystemTraceNo'] ?: $prefer;
+        return isset($this->parameters['SystemTraceNo']) ? $this->parameters['SystemTraceNo'] : $prefer;
     }
 
     /**
@@ -54,7 +54,7 @@ class SadadAdviceResultProvider extends AbstractBaseParameterProvider
      */
     public function getAmount($prefer = null)
     {
-        return $this->parameters['Amount'] ?: $prefer;
+        return isset($this->parameters['Amount']) ? $this->parameters['Amount'] : $prefer;
     }
 
     /**
@@ -63,7 +63,7 @@ class SadadAdviceResultProvider extends AbstractBaseParameterProvider
      */
     public function getDescription($prefer = null)
     {
-        return $this->parameters['Description'] ?: $prefer;
+        return isset($this->parameters['Description']) ? $this->parameters['Description'] : $prefer;
     }
 
     /**
@@ -72,6 +72,6 @@ class SadadAdviceResultProvider extends AbstractBaseParameterProvider
      */
     public function getOrderId($prefer = null)
     {
-        return $this->parameters['OrderId'] ?: $prefer;
+        return isset($this->parameters['OrderId']) ? $this->parameters['OrderId'] : $prefer;
     }
 }
