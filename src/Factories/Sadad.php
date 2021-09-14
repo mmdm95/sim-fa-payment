@@ -183,7 +183,7 @@ class Sadad extends AbstractPayment
 
             $adviceProvider = new SadadAdviceResultProvider($result['response']);
             // res code is null on success(this is not documented! shame on them)
-            if ($adviceProvider->getResCode() == 0) {
+            if (!is_null($adviceProvider->getResCode()) && $adviceProvider->getResCode() == 0) {
                 $this->emitter->dispatch(self::OK_SEND_ADVICE, [$adviceProvider, $resProvider]);
             } else {
                 $this->emitter->dispatch(self::NOT_OK_SEND_ADVICE, [
