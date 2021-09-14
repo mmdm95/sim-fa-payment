@@ -87,11 +87,7 @@ abstract class AbstractPayment extends AbstractPaymentEvent implements IPayment
     {
         $result = [];
         if (strtoupper($_SERVER["REQUEST_METHOD"]) == $this->handlerMethod) {
-            if($this->handlerMethod == PaymentFactory::METHOD_GET) {
-                $method = $_GET;
-            } else {
-                $method = $_POST;
-            }
+            $method = $this->handlerMethod == PaymentFactory::METHOD_GET ? $_GET : $_POST;
             foreach ($data as $name) {
                 $result[$name] = isset($method[$name])
                     ? PaymentCurlUtil::escapeData($method[$name])

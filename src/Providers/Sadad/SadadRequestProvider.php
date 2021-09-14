@@ -76,9 +76,11 @@ class SadadRequestProvider extends AbstractParameterProvider
 
     /**
      * @param string $applicationName
+     * @return static
      */
     public function setApplicationName(string $applicationName)
     {
         $this->parameters['ApplicationName'] = $applicationName;
+        return $this;
     }
 }
