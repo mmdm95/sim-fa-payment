@@ -6,6 +6,7 @@ use Sim\Payment\Factories\BehPardakht;
 use Sim\Payment\Factories\IDPay;
 use Sim\Payment\Factories\Mabna;
 use Sim\Payment\Factories\Sadad;
+use Sim\Payment\Factories\TAP\TapPayment\TapPayment;
 use Sim\Payment\Factories\Zarinpal;
 
 class PaymentFactory
@@ -21,11 +22,12 @@ class PaymentFactory
     const GATEWAY_BEH_PARDAKHT = 3;
     const GATEWAY_ZARINPAL = 4;
     const GATEWAY_SADAD = 5;
+    const GATEWAY_TAP = 6;
 
     /**
      * @param int $type
      * @param mixed ...$data
-     * @return BehPardakht|IDPay|Mabna|Zarinpal|Sadad|null
+     * @return BehPardakht|IDPay|Mabna|Zarinpal|Sadad|TapPayment|null
      */
     public static function instance(int $type, ...$data)
     {
@@ -40,6 +42,8 @@ class PaymentFactory
                 return new Zarinpal(...$data);
             case self::GATEWAY_SADAD:
                 return new Sadad(...$data);
+            case self::GATEWAY_TAP:
+                return new TapPayment(...$data);
             default:
                 return null;
         }
