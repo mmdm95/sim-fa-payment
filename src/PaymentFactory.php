@@ -6,7 +6,7 @@ use Sim\Payment\Factories\BehPardakht;
 use Sim\Payment\Factories\IDPay;
 use Sim\Payment\Factories\Mabna;
 use Sim\Payment\Factories\Sadad;
-use Sim\Payment\Factories\TAP\TapPayment\TapPayment;
+use Sim\Payment\Factories\TAP\TapPayment;
 use Sim\Payment\Factories\Zarinpal;
 
 class PaymentFactory
