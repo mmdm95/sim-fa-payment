@@ -1,10 +1,9 @@
 <?php
 
-namespace Sim\Payment\Factories\TAP\TapPayment;
+namespace Sim\Payment\Factories\TAP;
 
 use Sim\Payment\Abstracts\AbstractAdviceParameterProvider;
 use Sim\Payment\Abstracts\AbstractParameterProvider;
-use Sim\Payment\Factories\TAP\AbstractTap;
 use Sim\Payment\PaymentFactory;
 use Sim\Payment\Providers\CurlProvider;
 use Sim\Payment\Providers\HeaderProvider;
