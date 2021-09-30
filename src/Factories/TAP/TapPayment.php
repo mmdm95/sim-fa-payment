@@ -60,6 +60,7 @@ class TapPayment extends AbstractTap
             'requestData' => $provider->getParameters(),
         ]);
         //-----
+        $result = json_decode(json_encode($result), true);
         $resProvider = new TapRequestResultProvider($result);
 
         if ($resProvider->getToken() && $resProvider->getStatus(-1) == 0) {
@@ -104,6 +105,7 @@ class TapPayment extends AbstractTap
                 'requestData' => $provider->getParameters(),
             ]);
 
+            $result = json_decode(json_encode($result), true);
             $adviceProvider = new TapAdviceResultProvider($result);
             if (!is_null($adviceProvider->getStatus()) && $adviceProvider->getStatus() == 0) {
                 $this->emitter->dispatch(self::OK_SEND_ADVICE, [$adviceProvider, $resProvider]);

@@ -249,7 +249,8 @@ class BehPardakht extends AbstractPayment
                 'parameters' => $provider->getParameters(),
                 'namespace' => $this->namespace,
             ]);
-
+            //-----
+            $result = json_decode(json_encode($result), true);
             $adviceResProvider = new BehPardakhtAdviceResultProvider($result);
             if ($adviceResProvider->getReturn(-1000) == 0 || $adviceResProvider->getReturn() == 51) {
                 if ($adviceResProvider->getReturn(-1000) == 0) {

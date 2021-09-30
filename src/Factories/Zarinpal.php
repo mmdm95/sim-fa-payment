@@ -102,6 +102,8 @@ class Zarinpal extends AbstractPayment
 
         $provider->setExtraParameter('MerchantID', $this->parameters['MerchantID']);
         $result = $this->client->PaymentRequest($provider->getParameters());
+        //-----
+        $result = json_decode(json_encode($result), true);
         $resProvider = new ZarinpalRequestResultProvider($result);
 
         if ($resProvider->getStatus() == 100) {
@@ -154,7 +156,8 @@ class Zarinpal extends AbstractPayment
                 $this->emitter->dispatch(self::BF_SEND_ADVICE, [$resProvider]);
 
                 $result = $this->client->PaymentVerification($provider->getParameters());
-
+                //-----
+                $result = json_decode(json_encode($result), true);
                 $adviceProvider = new ZarinpalAdviceResultProvider($result);
                 if ($adviceProvider->getStatus() == 100) {
                     $this->emitter->dispatch(self::OK_SEND_ADVICE, [$adviceProvider, $resProvider]);
