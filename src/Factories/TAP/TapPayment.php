@@ -29,7 +29,12 @@ class TapPayment extends AbstractTap
      */
     protected $gateway_variables_name = [
         self::OPERATION_REQUEST => [
-
+            'Token',
+            'status',
+            'OrderId',
+            'TerminalNo',
+            'Amount',
+            'RRN',
         ],
     ];
 
