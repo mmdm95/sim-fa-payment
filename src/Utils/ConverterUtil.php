@@ -57,7 +57,7 @@ class ConverterUtil
             if (\is_array($str)) {
                 $newArr = [];
                 foreach ($str as $k => $v) {
-                    $newArr[$k] = self::toPersian($str[$k], $convert_type);
+                    $newArr[$k] = self::toPersian($v, $convert_type);
                 }
                 return $newArr;
             }
@@ -98,7 +98,7 @@ class ConverterUtil
             if (\is_array($str)) {
                 $newArr = [];
                 foreach ($str as $k => $v) {
-                    $newArr[$k] = self::toArabic($str[$k], $convert_type);
+                    $newArr[$k] = self::toArabic($v, $convert_type);
                 }
                 return $newArr;
             }
