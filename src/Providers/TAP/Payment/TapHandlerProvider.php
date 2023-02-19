@@ -12,12 +12,12 @@ class TapHandlerProvider extends AbstractBaseParameterProvider
      */
     public function __construct(array $data)
     {
-        $this->parameters['Token'] = isset($data['Token']) ? $data['Token'] : null;
-        $this->parameters['status'] = isset($data['status']) ? $data['status'] : null;
-        $this->parameters['OrderId'] = isset($data['OrderId']) ? $data['OrderId'] : null;
-        $this->parameters['TerminalNo'] = isset($data['TerminalNo']) ? $data['TerminalNo'] : null;
-        $this->parameters['Amount'] = isset($data['Amount']) ? $data['Amount'] : null;
-        $this->parameters['RRN'] = isset($data['RRN']) ? $data['RRN'] : null;
+        $this->parameters['Token'] = $data['Token'] ?? null;
+        $this->parameters['status'] = $data['status'] ?? null;
+        $this->parameters['OrderId'] = $data['OrderId'] ?? null;
+        $this->parameters['TerminalNo'] = $data['TerminalNo'] ?? null;
+        $this->parameters['Amount'] = $data['Amount'] ?? null;
+        $this->parameters['RRN'] = $data['RRN'] ?? null;
         $this->addExtraParameters($data);
     }
 
@@ -27,7 +27,7 @@ class TapHandlerProvider extends AbstractBaseParameterProvider
      */
     public function getToken($prefer = null)
     {
-        return isset($this->parameters['Token']) ? $this->parameters['Token'] : $prefer;
+        return $this->parameters['Token'] ?? $prefer;
     }
 
     /**
@@ -36,7 +36,7 @@ class TapHandlerProvider extends AbstractBaseParameterProvider
      */
     public function getStatus($prefer = null)
     {
-        return isset($this->parameters['status']) ? $this->parameters['status'] : $prefer;
+        return $this->parameters['status'] ?? $prefer;
     }
 
     /**
@@ -45,7 +45,7 @@ class TapHandlerProvider extends AbstractBaseParameterProvider
      */
     public function getOrderId($prefer = null)
     {
-        return isset($this->parameters['OrderId']) ? $this->parameters['OrderId'] : $prefer;
+        return $this->parameters['OrderId'] ?? $prefer;
     }
 
     /**
@@ -54,7 +54,7 @@ class TapHandlerProvider extends AbstractBaseParameterProvider
      */
     public function getTerminalNo($prefer = null)
     {
-        return isset($this->parameters['TerminalNo']) ? $this->parameters['TerminalNo'] : $prefer;
+        return $this->parameters['TerminalNo'] ?? $prefer;
     }
 
     /**
@@ -63,7 +63,7 @@ class TapHandlerProvider extends AbstractBaseParameterProvider
      */
     public function getAmount($prefer = null)
     {
-        return isset($this->parameters['Amount']) ? $this->parameters['Amount'] : $prefer;
+        return $this->parameters['Amount'] ?? $prefer;
     }
 
     /**
@@ -72,6 +72,6 @@ class TapHandlerProvider extends AbstractBaseParameterProvider
      */
     public function getRRN($prefer = null)
     {
-        return isset($this->parameters['RRN']) ? $this->parameters['RRN'] : $prefer;
+        return $this->parameters['RRN'] ?? $prefer;
     }
 }
