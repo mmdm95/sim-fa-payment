@@ -12,9 +12,9 @@ class SadadRequestResultProvider extends AbstractBaseParameterProvider
      */
     public function __construct(array $data)
     {
-        $this->parameters['ResCode'] = isset($data['ResCode']) ? $data['ResCode'] : null;
-        $this->parameters['Token'] = isset($data['Token']) ? $data['Token'] : null;
-        $this->parameters['Description'] = isset($data['Description']) ? $data['Description'] : null;
+        $this->parameters['ResCode'] = $data['ResCode'] ?? null;
+        $this->parameters['Token'] = $data['Token'] ?? null;
+        $this->parameters['Description'] = $data['Description'] ?? null;
         $this->addExtraParameters($data);
     }
 
@@ -24,7 +24,7 @@ class SadadRequestResultProvider extends AbstractBaseParameterProvider
      */
     public function getResCode($prefer = null)
     {
-        return isset($this->parameters['ResCode']) ? $this->parameters['ResCode'] : $prefer;
+        return $this->parameters['ResCode'] ?? $prefer;
     }
 
     /**
@@ -33,7 +33,7 @@ class SadadRequestResultProvider extends AbstractBaseParameterProvider
      */
     public function getToken($prefer = null)
     {
-        return isset($this->parameters['Token']) ? $this->parameters['Token'] : $prefer;
+        return $this->parameters['Token'] ?? $prefer;
     }
 
     /**
@@ -42,7 +42,7 @@ class SadadRequestResultProvider extends AbstractBaseParameterProvider
      */
     public function getDescription($prefer = null)
     {
-        return isset($this->parameters['Description']) ? $this->parameters['Description'] : $prefer;
+        return $this->parameters['Description'] ?? $prefer;
     }
 
     /**

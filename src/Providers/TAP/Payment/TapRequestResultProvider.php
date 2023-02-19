@@ -12,9 +12,9 @@ class TapRequestResultProvider extends AbstractBaseParameterProvider
      */
     public function __construct(array $data)
     {
-        $this->parameters['Status'] = isset($data['SalePaymentRequestResult']['Status']) ? $data['SalePaymentRequestResult']['Status'] : null;
-        $this->parameters['Token'] = isset($data['SalePaymentRequestResult']['Token']) ? $data['SalePaymentRequestResult']['Token'] : null;
-        $this->parameters['Message'] = isset($data['SalePaymentRequestResult']['Message']) ? $data['SalePaymentRequestResult']['Message'] : null;
+        $this->parameters['Status'] = $data['SalePaymentRequestResult']['Status'] ?? null;
+        $this->parameters['Token'] = $data['SalePaymentRequestResult']['Token'] ?? null;
+        $this->parameters['Message'] = $data['SalePaymentRequestResult']['Message'] ?? null;
         $this->addExtraParameters($data['SalePaymentRequestResult'] ?? []);
     }
 
@@ -24,7 +24,7 @@ class TapRequestResultProvider extends AbstractBaseParameterProvider
      */
     public function getStatus($prefer = null)
     {
-        return isset($this->parameters['Status']) ? $this->parameters['Status'] : $prefer;
+        return $this->parameters['Status'] ?? $prefer;
     }
 
     /**
@@ -33,7 +33,7 @@ class TapRequestResultProvider extends AbstractBaseParameterProvider
      */
     public function getToken($prefer = null)
     {
-        return isset($this->parameters['Token']) ? $this->parameters['Token'] : $prefer;
+        return $this->parameters['Token'] ?? $prefer;
     }
 
     /**
@@ -42,7 +42,7 @@ class TapRequestResultProvider extends AbstractBaseParameterProvider
      */
     public function getMessage($prefer = null)
     {
-        return isset($this->parameters['Message']) ? $this->parameters['Message'] : $prefer;
+        return $this->parameters['Message'] ?? $prefer;
     }
 
     /**

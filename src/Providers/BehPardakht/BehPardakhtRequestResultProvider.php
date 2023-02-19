@@ -12,8 +12,8 @@ class BehPardakhtRequestResultProvider extends AbstractBaseParameterProvider
      */
     public function __construct($data)
     {
-        $this->parameters['RefId'] = isset($data['RefId']) ? $data['RefId'] : null;
-        $this->parameters['ResCode'] = isset($data['ResCode']) ? $data['ResCode'] : null;
+        $this->parameters['RefId'] = $data['RefId'] ?? null;
+        $this->parameters['ResCode'] = $data['ResCode'] ?? null;
         $this->addExtraParameters($data);
     }
 
@@ -23,7 +23,7 @@ class BehPardakhtRequestResultProvider extends AbstractBaseParameterProvider
      */
     public function getRefId($prefer = null)
     {
-        return isset($this->parameters['RefId']) ? $this->parameters['RefId'] : $prefer;
+        return $this->parameters['RefId'] ?? $prefer;
     }
 
     /**
@@ -32,6 +32,6 @@ class BehPardakhtRequestResultProvider extends AbstractBaseParameterProvider
      */
     public function getResCode($prefer = null)
     {
-        return isset($this->parameters['ResCode']) ? $this->parameters['ResCode'] : $prefer;
+        return $this->parameters['ResCode'] ?? $prefer;
     }
 }

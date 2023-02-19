@@ -12,9 +12,9 @@ class IDPayRequestResultProvider extends AbstractBaseParameterProvider
      */
     public function __construct($data)
     {
-        $this->parameters['id'] = isset($data['id']) ? $data['id'] : null;
-        $this->parameters['link'] = isset($data['link']) ? $data['link'] : null;
-        $this->parameters['error_code'] = isset($data['error_code']) ? $data['error_code'] : null;
+        $this->parameters['id'] = $data['id'] ?? null;
+        $this->parameters['link'] = $data['link'] ?? null;
+        $this->parameters['error_code'] = $data['error_code'] ?? null;
         $this->addExtraParameters($data);
     }
 
@@ -24,7 +24,7 @@ class IDPayRequestResultProvider extends AbstractBaseParameterProvider
      */
     public function getId($prefer = null)
     {
-        return isset($this->parameters['id']) ? $this->parameters['id'] : $prefer;
+        return $this->parameters['id'] ?? $prefer;
     }
 
     /**
@@ -33,7 +33,7 @@ class IDPayRequestResultProvider extends AbstractBaseParameterProvider
      */
     public function getLink($prefer = null)
     {
-        return isset($this->parameters['link']) ? $this->parameters['link'] : $prefer;
+        return $this->parameters['link'] ?? $prefer;
     }
 
     /**
@@ -42,6 +42,6 @@ class IDPayRequestResultProvider extends AbstractBaseParameterProvider
      */
     public function getErrorCode($prefer = null)
     {
-        return isset($this->parameters['error_code']) ? $this->parameters['error_code'] : $prefer;
+        return $this->parameters['error_code'] ?? $prefer;
     }
 }
