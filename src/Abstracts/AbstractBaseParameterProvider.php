@@ -46,9 +46,15 @@ abstract class AbstractBaseParameterProvider implements
      */
     protected function addExtraParameters($data)
     {
-        $data = array_diff($data, $this->parameters);
-        foreach ($data as $k => $v) {
-            $this->parameters[$k] = $v;
+        try {
+            if(is_array($data) && is_array($this->parameters)) {
+                $data = array_diff($data, $this->parameters);
+                foreach ($data as $k => $v) {
+                    $this->parameters[$k] = $v;
+                }
+            }
+        } catch (\Exception $e) {
+            // do nothing for now
         }
     }
 }

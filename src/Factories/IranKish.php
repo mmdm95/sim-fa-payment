@@ -137,8 +137,8 @@ class IranKish extends AbstractPayment
     {
         $this->emitter->dispatch(self::BF_CREATE_REQUEST);
 
-        $provider->setExtraParameter('', $this->parameters['acceptorId'])
-            ->setExtraParameter('', $this->parameters['terminalId']);
+        $provider->setExtraParameter('acceptorId', $this->parameters['acceptorId'])
+            ->setExtraParameter('terminalId', $this->parameters['terminalId']);
 
         $data = [];
         $data['request'] = $provider->getParameters();
