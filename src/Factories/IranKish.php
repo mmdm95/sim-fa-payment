@@ -127,7 +127,7 @@ class IranKish extends AbstractPayment
         $this->parameters['terminalId'] = $terminalId;
         $this->parameters['password'] = $terminalId;
         $this->parameters['acceptorId'] = $acceptorId;
-        $this->parameters['publicKey'] = $acceptorId;
+        $this->parameters['publicKey'] = $publicKey;
     }
 
     /**
