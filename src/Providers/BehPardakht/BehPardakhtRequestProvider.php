@@ -31,7 +31,7 @@ class BehPardakhtRequestProvider extends AbstractParameterProvider
      */
     public function setAmount($amount)
     {
-        $this->parameters['Amount'] = $amount;
+        $this->parameters['amount'] = $amount;
         return $this;
     }
 
