@@ -286,6 +286,7 @@ class BehPardakht extends AbstractPayment
                         'namespace' => $this->namespace,
                     ]);
 
+                    $result = json_decode(json_encode($result), true);
                     $settleResProvider = new BehPardakhtSettleResultProvider($result);
 
                     if ($settleResProvider->getReturn(-1000) == 0) {
