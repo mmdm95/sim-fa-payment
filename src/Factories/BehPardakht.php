@@ -203,7 +203,7 @@ class BehPardakht extends AbstractPayment
         $refId = null;
         $resCode = null;
         if (!is_soap_fault($result)) {
-            $result = explode(',', $result);
+            $result = explode(',', $result['return']);
             if (2 == count($result)) {
                 $resCode = $result[0];
                 $refId = $result[1] ?? '';
@@ -220,7 +220,9 @@ class BehPardakht extends AbstractPayment
         } else {
             $this->emitter->dispatch(self::NOT_OK_CREATE_REQUEST, [
                 $resProvider->getResCode(),
-                $this->getMessage($resProvider->getResCode(), self::OPERATION_REQUEST),
+                !is_null($resProvider->getResCode())
+                    ? $this->getMessage($resProvider->getResCode(), self::OPERATION_REQUEST)
+                    : 'خطای نامشخص',
                 $resProvider
             ]);
         }
