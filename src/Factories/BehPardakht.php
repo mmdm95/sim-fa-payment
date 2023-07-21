@@ -203,7 +203,7 @@ class BehPardakht extends AbstractPayment
         $refId = null;
         $resCode = null;
         if (!is_soap_fault($result)) {
-            $result = explode(',', $result['return']);
+            $result = explode(',', $result->return);
             if (2 == count($result)) {
                 $resCode = $result[0];
                 $refId = $result[1] ?? '';
