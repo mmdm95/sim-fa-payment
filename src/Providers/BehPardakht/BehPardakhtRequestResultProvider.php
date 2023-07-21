@@ -34,4 +34,12 @@ class BehPardakhtRequestResultProvider extends AbstractBaseParameterProvider
     {
         return $this->parameters['ResCode'] ?? $prefer;
     }
+
+    /**
+     * @return string
+     */
+    public function getUrl(): string
+    {
+        return 'https://bpm.shaparak.ir/pgwchannel/startpay.mellat';
+    }
 }
