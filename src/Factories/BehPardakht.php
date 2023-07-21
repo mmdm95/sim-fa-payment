@@ -190,6 +190,11 @@ class BehPardakht extends AbstractPayment
     {
         $this->emitter->dispatch(self::BF_CREATE_REQUEST);
 
+        // set credentials
+        $provider->setExtraParameter('terminalId', $this->parameters['terminalId'])
+            ->setExtraParameter('userName', $this->parameters['userName'])
+            ->setExtraParameter('userPassword', $this->parameters['userPassword']);
+
         $result = $this->client->__soapCall('bpPayRequest', [
             'parameters' => $provider->getParameters(),
             'namespace' => $this->namespace,
@@ -245,6 +250,11 @@ class BehPardakht extends AbstractPayment
                 ->setExtraParameter('saleOrderId', $resProvider->getSaleOrderId())
                 ->setExtraParameter('saleReferenceId', $resProvider->getSaleReferenceId());
 
+            // set credentials
+            $provider->setExtraParameter('terminalId', $this->parameters['terminalId'])
+                ->setExtraParameter('userName', $this->parameters['userName'])
+                ->setExtraParameter('userPassword', $this->parameters['userPassword']);
+
             $result = $this->client->__soapCall('bpVerifyRequest', [
                 'parameters' => $provider->getParameters(),
                 'namespace' => $this->namespace,
@@ -262,6 +272,11 @@ class BehPardakht extends AbstractPayment
                     $settleProvider->setExtraParameter('orderId', $resProvider->getSaleOrderId())
                         ->setExtraParameter('saleOrderId', $resProvider->getSaleOrderId())
                         ->setExtraParameter('saleReferenceId', $resProvider->getSaleReferenceId());
+
+                    // set credentials
+                    $settleProvider->setExtraParameter('terminalId', $this->parameters['terminalId'])
+                        ->setExtraParameter('userName', $this->parameters['userName'])
+                        ->setExtraParameter('userPassword', $this->parameters['userPassword']);
 
                     // Settle request
                     $result = $this->client->__soapCall('bpSettleRequest', [
