@@ -240,7 +240,7 @@ class BehPardakht extends AbstractPayment
 
         if (
             !is_null($resProvider->getRefId()) &&
-            $resProvider->getResCode(-1000) != -1000 &&
+            $resProvider->getResCode(-1000) == 0 &&
             !is_null($resProvider->getSaleOrderId())
         ) {
             $this->emitter->dispatch(self::OK_HANDLE_RESULT, [$resProvider]);
