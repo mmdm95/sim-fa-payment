@@ -113,6 +113,24 @@ class CurlProvider
     }
 
     /**
+     * @param $verifyPeer
+     * @return static
+     */
+    public function setSSLVerifyPeer($verifyPeer)
+    {
+        $this->options[CURLOPT_SSL_VERIFYPEER] = $verifyPeer;
+        return $this;
+    }
+
+    /**
+     * @return mixed|null
+     */
+    public function getSSLVerifyPeer()
+    {
+        return $this->options[CURLOPT_SSL_VERIFYPEER] ?? null;
+    }
+
+    /**
      * @param string|array $data
      * @return static
      */

@@ -217,10 +217,12 @@ class Sadad extends AbstractPayment
         $curlProvider->setRequestMethod(PaymentFactory::METHOD_POST);
         $curlProvider->setFields($newData);
         $curlProvider->setReturnTransfer(true);
+        $curlProvider->setSSLVerifyPeer(0);
 
         //----- Add some header
         $headerProvider = new HeaderProvider();
         $headerProvider->contentType('application/json');
+        $headerProvider->charset('utf-8');
         $headerProvider->contentLength(strlen($newData));
         //-----
 

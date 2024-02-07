@@ -53,6 +53,20 @@ class HeaderProvider
     }
 
     /**
+     * @param string $charset
+     * @return static
+     */
+    public function charset(string $charset)
+    {
+        if (!isset($this->headers['charset']) || !is_array($this->headers['charset'])) {
+            $this->headers['charset'] = [];
+        }
+
+        $this->headers['charset'][] = $charset;
+        return $this;
+    }
+
+    /**
      * @param string $content_encoding
      * @return static
      */
